@@ -1,20 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 
-class MyLocation extends StatefulWidget {
-  const MyLocation({super.key, required this.title});
-
-  final String title;
+class GPSWidget extends StatefulWidget {
+  const GPSWidget({super.key});
 
   @override
-  State<MyLocation> createState() => _MyHomePageState();
+  State<GPSWidget> createState() => _GPSWidgetState();
 }
 
-class _MyHomePageState extends State<MyLocation> {
+class _GPSWidgetState extends State<GPSWidget> {
   double _latitude = 0;
   double _longitude = 0;
 
-  Future<void> _myGPS() async {
+  Future<void> myLocate() async {
     LocationPermission permission = await Geolocator.requestPermission();
     if (permission == LocationPermission.deniedForever) {
       return Future.error('Location Not Available');
@@ -31,43 +29,41 @@ class _MyHomePageState extends State<MyLocation> {
 
   @override
   Widget build(BuildContext context) {
-    Future<Position> getCurrentLocation() async {
-      Position position = await Geolocator.getCurrentPosition(
-          desiredAccuracy: LocationAccuracy.high);
-
-      return position;
-    }
-
-    return Scaffold(
-      appBar: AppBar(
-        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-        title: Text(widget.title),
-      ),
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            Text(
-              'My Location',
-              style: Theme.of(context).textTheme.headlineMedium,
-            ),
-            const Text('   '),
-            Text(
-              '위도 : $_latitude',
-              style: Theme.of(context).textTheme.headlineSmall,
-            ),
-            Text(
-              '경도 : $_longitude',
-              style: Theme.of(context).textTheme.headlineSmall,
-            ),
-          ],
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        Text(
+          '위도 : $_latitude',
+          style: const TextStyle(
+            color: Colors.white,
+            fontSize: 20,
+            fontWeight: FontWeight.w400,
+          ),
         ),
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _myGPS,
-        tooltip: 'Increment',
-        child: const Icon(Icons.add),
-      ), // This trailing comma makes auto-formatting nicer for build methods.
+        const SizedBox(
+          width: 30,
+        ),
+        Text(
+          '경도 : $_longitude',
+          style: const TextStyle(
+            color: Colors.white,
+            fontSize: 20,
+            fontWeight: FontWeight.w400,
+          ),
+        ),
+        const SizedBox(
+          width: 40,
+        ),
+        ElevatedButton(
+          onPressed: myLocate,
+          child: const Text(
+            'Click',
+            style: TextStyle(
+              fontSize: 20,
+            ),
+          ),
+        ),
+      ],
     );
   }
 }

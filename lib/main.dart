@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
-
-import 'widgets/location.dart';
+import 'widgets/home.dart';
 
 void main() {
   runApp(const MyApp());
@@ -12,14 +11,10 @@ class MyApp extends StatelessWidget {
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Flutter Demo',
+    return const MaterialApp(
+      title: 'Flutter Page',
       debugShowCheckedModeBanner: false,
-      theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
-        useMaterial3: true,
-      ),
-      home: const MyLocation(title: 'I Wanna Know My Location'),
+      home: Home(),
     );
   }
 }
