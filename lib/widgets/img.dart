@@ -1,9 +1,7 @@
 import 'package:flutter/material.dart';
 
 class Img extends StatelessWidget {
-  Img({super.key});
-
-  int a = 1;
+  const Img({super.key});
 
   @override
   Widget build(BuildContext context) {
