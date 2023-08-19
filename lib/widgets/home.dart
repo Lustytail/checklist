@@ -18,7 +18,7 @@ class Home extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             const SizedBox(
-              height: 30,
+              height: 50,
             ),
             Container(
               decoration: BoxDecoration(
