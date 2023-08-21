@@ -5,6 +5,13 @@ class CalendarPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container();
+    return Container(
+      child: Text(
+        'calendar',
+        style: TextStyle(
+          color: Colors.white,
+        ),
+      ),
+    );
   }
 }

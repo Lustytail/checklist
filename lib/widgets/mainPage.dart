@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 
 import 'calendar/calendarMenu.dart';
+import 'calendar/calendarPage.dart';
 import 'checklist/ChecklistPage.dart';
 import 'checklist/checklistMenu.dart';
 import 'home/homeMenu.dart';
+import 'home/homePage.dart';
 
 class MainPage extends StatefulWidget {
   const MainPage({super.key});
@@ -14,7 +16,9 @@ class MainPage extends StatefulWidget {
 
 class _MainPageState extends State<MainPage> {
   int _currentIndex = 1;
-  final PageController _pageController = PageController();
+  final PageController _pageController = PageController(
+    initialPage: 1,
+  );
 
   final _topWidget = [
     const CalendarMenu(),
@@ -33,13 +37,15 @@ class _MainPageState extends State<MainPage> {
       body: PageView(
         controller: _pageController,
         onPageChanged: (index) {
-          setState(() {
-            _currentIndex = index;
-          });
+          setState(
+            () {
+              _currentIndex = index;
+            },
+          );
         },
         children: const <Widget>[
-          CalendarMenu(),
-          HomeMenu(),
+          CalendarPage(),
+          HomePage(),
           ChecklistPage(),
           // Add other pages
         ],
@@ -51,6 +57,11 @@ class _MainPageState extends State<MainPage> {
         elevation: 5,
         currentIndex: _currentIndex,
         onTap: (index) {
+          setState(
+            () {
+              _currentIndex = index;
+            },
+          );
           _pageController.animateToPage(
             index,
             duration: const Duration(milliseconds: 300),

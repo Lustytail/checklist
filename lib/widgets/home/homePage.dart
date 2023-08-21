@@ -5,6 +5,13 @@ class HomePage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container();
+    return Container(
+      child: Text(
+        'homepage',
+        style: TextStyle(
+          color: Colors.white,
+        ),
+      ),
+    );
   }
 }
