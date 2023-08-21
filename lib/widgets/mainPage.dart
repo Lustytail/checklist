@@ -1,9 +1,8 @@
 import 'package:flutter/material.dart';
-import 'calendar/calendarPage.dart';
+
 import 'calendar/calendarMenu.dart';
 import 'checklist/ChecklistPage.dart';
 import 'checklist/checklistMenu.dart';
-import 'home/homePage.dart';
 import 'home/homeMenu.dart';
 
 class MainPage extends StatefulWidget {
@@ -15,17 +14,12 @@ class MainPage extends StatefulWidget {
 
 class _MainPageState extends State<MainPage> {
   int _currentIndex = 1;
+  final PageController _pageController = PageController();
 
   final _topWidget = [
     const CalendarMenu(),
     const HomeMenu(),
     const ChecklistMenu(),
-  ];
-
-  final _bodyWidget = [
-    const CalendarPage(),
-    const HomePage(),
-    const ChecklistPage(),
   ];
 
   @override
@@ -36,7 +30,20 @@ class _MainPageState extends State<MainPage> {
         backgroundColor: const Color.fromARGB(255, 101, 101, 101),
         title: _topWidget[_currentIndex],
       ),
-      body: _bodyWidget[_currentIndex],
+      body: PageView(
+        controller: _pageController,
+        onPageChanged: (index) {
+          setState(() {
+            _currentIndex = index;
+          });
+        },
+        children: const <Widget>[
+          CalendarMenu(),
+          HomeMenu(),
+          ChecklistPage(),
+          // Add other pages
+        ],
+      ),
       bottomNavigationBar: BottomNavigationBar(
         backgroundColor: const Color.fromARGB(255, 101, 101, 101),
         selectedItemColor: const Color.fromARGB(222, 187, 187, 255),
@@ -44,9 +51,11 @@ class _MainPageState extends State<MainPage> {
         elevation: 5,
         currentIndex: _currentIndex,
         onTap: (index) {
-          setState(() {
-            _currentIndex = index;
-          });
+          _pageController.animateToPage(
+            index,
+            duration: const Duration(milliseconds: 300),
+            curve: Curves.easeInOut,
+          );
         },
         items: const [
           BottomNavigationBarItem(

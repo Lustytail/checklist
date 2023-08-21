@@ -5,6 +5,12 @@ class ChecklistPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container();
+    return const Text(
+      'Checklist',
+      style: TextStyle(
+        color: Colors.white,
+        fontSize: 20,
+      ),
+    );
   }
 }
