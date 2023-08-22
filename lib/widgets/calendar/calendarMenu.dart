@@ -13,7 +13,7 @@ class CalendarMenu extends StatelessWidget {
         child: Row(
           children: [
             Text(
-              'Setting Menu',
+              '임장 캘린더',
               style: TextStyle(
                 fontSize: 25,
                 color: Color.fromARGB(255, 231, 231, 231),

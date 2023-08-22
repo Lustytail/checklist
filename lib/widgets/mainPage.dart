@@ -16,14 +16,17 @@ class MainPage extends StatefulWidget {
 
 class _MainPageState extends State<MainPage> {
   int _currentIndex = 1;
-  final PageController _pageController = PageController(
-    initialPage: 1,
-  );
 
   final _topWidget = [
     const CalendarMenu(),
     const HomeMenu(),
     const ChecklistMenu(),
+  ];
+
+  final _bodyWidget = [
+    const CalendarPage(),
+    const HomePage(),
+    const ChecklistPage(),
   ];
 
   @override
@@ -34,22 +37,7 @@ class _MainPageState extends State<MainPage> {
         backgroundColor: const Color.fromARGB(255, 101, 101, 101),
         title: _topWidget[_currentIndex],
       ),
-      body: PageView(
-        controller: _pageController,
-        onPageChanged: (index) {
-          setState(
-            () {
-              _currentIndex = index;
-            },
-          );
-        },
-        children: const <Widget>[
-          CalendarPage(),
-          HomePage(),
-          ChecklistPage(),
-          // Add other pages
-        ],
-      ),
+      body: _bodyWidget[_currentIndex],
       bottomNavigationBar: BottomNavigationBar(
         backgroundColor: const Color.fromARGB(255, 101, 101, 101),
         selectedItemColor: const Color.fromARGB(222, 187, 187, 255),
@@ -61,11 +49,6 @@ class _MainPageState extends State<MainPage> {
             () {
               _currentIndex = index;
             },
-          );
-          _pageController.animateToPage(
-            index,
-            duration: const Duration(milliseconds: 300),
-            curve: Curves.easeInOut,
           );
         },
         items: const [

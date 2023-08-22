@@ -37,6 +37,7 @@ dependencies:
   cupertino_icons: ^1.0.2
   geolocator: ^8.0.1
   day_night_switch:
+  table_calendar: ^3.0.6
 
 dev_dependencies:
   flutter_test:
