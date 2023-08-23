@@ -12,6 +12,7 @@ class _HomePageState extends State<HomePage> {
   List<String> checkList = [];
   int count = 0;
   String text = "";
+
   void addCheckList() {
     setState(() {
       text = _textFieldController.text;
@@ -28,8 +29,50 @@ class _HomePageState extends State<HomePage> {
     _textFieldController.clear();
   }
 
-  void changeList() {
-    print("change");
+  void changeList(int index) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        String updatedText = ""; // Create a variable to hold the new text
+
+        return AlertDialog(
+          title: const Text("수정할 내용을 작성해주세요."),
+          content: TextField(
+            onChanged: (value) {
+              updatedText = value; // Update the new text as user types
+            },
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop(); // Close the dialog
+              },
+              child: const Icon(
+                Icons.cancel,
+                size: 30,
+                color: Colors.red,
+              ),
+            ),
+            TextButton(
+              onPressed: () {
+                setState(() {
+                  if (updatedText.isNotEmpty) {
+                    checkList[index] =
+                        updatedText; // Update the text in the list
+                  }
+                  Navigator.of(context).pop(); // Close the dialog
+                });
+              },
+              child: const Icon(
+                Icons.save,
+                size: 30,
+                color: Colors.black,
+              ),
+            ),
+          ],
+        );
+      },
+    );
   }
 
   void markCalendar() {
@@ -104,32 +147,52 @@ class _HomePageState extends State<HomePage> {
           flex: 1,
           child: Column(
             children: [
-              for (String item in checkList)
-                Row(
-                  children: [
-                    const SizedBox(
-                      width: 20,
-                      height: 20,
-                    ),
-                    Text(
-                      item,
-                      style: const TextStyle(
-                        color: Colors.grey,
-                        fontSize: 20,
+              for (int index = 0; index < checkList.length; index++)
+                for (int index = 0; index < checkList.length; index++)
+                  Dismissible(
+                    key: UniqueKey(),
+                    onDismissed: (_) {
+                      setState(() {
+                        checkList.removeAt(index);
+                      });
+                    },
+                    background: Container(
+                      alignment: Alignment.centerRight,
+                      color: Colors.red.withOpacity(0.8),
+                      child: const Padding(
+                        padding: EdgeInsets.all(8.0),
+                        child: Icon(
+                          Icons.delete,
+                          color: Colors.white,
+                        ),
                       ),
                     ),
-                    IconButton(
-                      tooltip: "수정하기",
-                      onPressed: changeList,
-                      icon: const Icon(Icons.edit_outlined),
+                    child: Row(
+                      children: [
+                        const SizedBox(
+                          width: 20,
+                          height: 20,
+                        ),
+                        Text(
+                          checkList[index],
+                          style: const TextStyle(
+                            color: Colors.grey,
+                            fontSize: 20,
+                          ),
+                        ),
+                        IconButton(
+                          tooltip: "수정하기",
+                          onPressed: () => changeList(index),
+                          icon: const Icon(Icons.edit_outlined),
+                        ),
+                        IconButton(
+                          tooltip: "달력에 표시",
+                          onPressed: markCalendar,
+                          icon: const Icon(Icons.edit_calendar_rounded),
+                        ),
+                      ],
                     ),
-                    IconButton(
-                      tooltip: "달력에 표시",
-                      onPressed: markCalendar,
-                      icon: const Icon(Icons.edit_calendar_rounded),
-                    ),
-                  ],
-                ),
+                  ),
             ],
           ),
         ),
