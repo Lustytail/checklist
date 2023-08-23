@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:hive_flutter/hive_flutter.dart';
 import 'package:table_calendar/table_calendar.dart';
+
+import '../../hive/house.dart';
 
 class CalendarPage extends StatefulWidget {
   const CalendarPage({super.key});
@@ -8,7 +11,6 @@ class CalendarPage extends StatefulWidget {
   State<StatefulWidget> createState() => _CalenarState();
 }
 
-//sdfsdfsd
 class _CalenarState extends State<CalendarPage> {
   DateTime selectedDay = DateTime.now();
   DateTime focusedDay = DateTime.now();
@@ -26,6 +28,9 @@ class _CalenarState extends State<CalendarPage> {
 
   @override
   Widget build(BuildContext context) {
+    final box = Hive.box<House>('house');
+    List<House> temp = box.values.toList();
+
     return SingleChildScrollView(
       scrollDirection: Axis.vertical,
       child: Column(
@@ -90,6 +95,19 @@ class _CalenarState extends State<CalendarPage> {
                 return _hoildays.contains(day) ? true : false;
               },
             ),
+          ),
+          Column(
+            // 리스트를 wiget형태로 출력하는 방법
+            children: temp
+                .map(
+                  (house) => Text(
+                    '이름 : ${house.name} / 주소 : ${house.address} / 메모 : ${house.description}',
+                    style: const TextStyle(
+                      color: Colors.white,
+                    ),
+                  ),
+                )
+                .toList(),
           ),
         ],
       ),
