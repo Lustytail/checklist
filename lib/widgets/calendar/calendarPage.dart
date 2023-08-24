@@ -16,11 +16,28 @@ class CalendarPage extends StatefulWidget {
 
 class _CalenarState extends State<CalendarPage> {
   final box = Hive.box<Schedule>('schedule');
-  DateTime selectedDay = DateTime.now();
-  DateTime focusedDay = DateTime.now();
+  late DateTime selectedDay;
+  late DateTime focusedDay;
   List<House> todaySchedules = [];
 
   final List<DateTime> _hoildays = [DateTime.utc(2023, 8, 15)];
+
+  @override
+  void initState() {
+    DateTime date = DateTime.utc(
+      DateTime.now().year,
+      DateTime.now().month,
+      DateTime.now().day,
+    );
+
+    selectedDay = date;
+    focusedDay = date;
+
+    if (!box.get(date.toString())!.list.isNull) {
+      todaySchedules = box.get(date.toString())!.list!;
+    }
+    super.initState();
+  }
 
   List<House> _getSchedules(DateTime day) {
     var temp = box.get(day.toString());
@@ -38,18 +55,44 @@ class _CalenarState extends State<CalendarPage> {
     return list;
   }
 
-  @override
-  void initState() {
-    String date = DateTime.utc(
-      DateTime.now().year,
-      DateTime.now().month,
-      DateTime.now().day,
-    ).toString();
+  void popUp() {
+    List<House>? list = box.get(selectedDay.toString())!.list;
 
-    if (!box.get(date)!.list.isNull) {
-      todaySchedules = box.get(date)!.list!;
-    }
-    super.initState();
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          contentPadding: const EdgeInsets.symmetric(
+            vertical: 5,
+            horizontal: 5,
+          ),
+          title: Container(
+            alignment: Alignment.center,
+            child: const Text('임장 계획 리스트'),
+          ),
+          content: Container(
+            width: 400,
+            height: 450,
+            color: Colors.black,
+            child: SingleChildScrollView(
+              scrollDirection: Axis.vertical,
+              child: Column(
+                children: todaySchedules
+                    .map(
+                      (house) => Text(
+                        '이름 : ${house.name} / 주소 : ${house.address} / 메모 : ${house.description}',
+                        style: const TextStyle(
+                          color: Colors.white,
+                        ),
+                      ),
+                    )
+                    .toList(),
+              ),
+            ),
+          ),
+        );
+      },
+    );
   }
 
   @override
@@ -58,16 +101,19 @@ class _CalenarState extends State<CalendarPage> {
       todaySchedules = box.get(selectedDay.toString())!.list!;
     }
 
-    return SingleChildScrollView(
-      scrollDirection: Axis.vertical,
-      child: Column(
-        children: [
-          Container(
+    return Column(
+      children: [
+        Flexible(
+          flex: 1,
+          child: Container(
             color: Colors.white,
             child: TableCalendar(
               headerStyle: const HeaderStyle(
                 titleCentered: true,
                 formatButtonVisible: false,
+                headerPadding: EdgeInsets.symmetric(
+                  vertical: 20,
+                ),
               ),
               calendarStyle: CalendarStyle(
                 defaultTextStyle: const TextStyle(
@@ -105,18 +151,22 @@ class _CalenarState extends State<CalendarPage> {
               firstDay: DateTime.utc(2021, 1, 1),
               lastDay: DateTime.utc(2030, 12, 31),
               daysOfWeekHeight: 25,
-              rowHeight: 50,
+              rowHeight: 60,
               focusedDay: selectedDay,
               onDaySelected: (selectedDay, focusedDay) {
                 setState(
                   () {
-                    this.selectedDay = selectedDay;
-                    this.focusedDay = focusedDay;
-
-                    if (!box.get(selectedDay.toString()).isNull) {
-                      todaySchedules = box.get(selectedDay.toString())!.list!;
+                    if (this.selectedDay == selectedDay) {
+                      popUp();
                     } else {
-                      todaySchedules = [];
+                      this.selectedDay = selectedDay;
+                      this.focusedDay = focusedDay;
+
+                      if (!box.get(selectedDay.toString()).isNull) {
+                        todaySchedules = box.get(selectedDay.toString())!.list!;
+                      } else {
+                        todaySchedules = [];
+                      }
                     }
                   },
                 );
@@ -130,21 +180,26 @@ class _CalenarState extends State<CalendarPage> {
               },
             ),
           ),
-          Column(
-            // 리스트를 wiget형태로 출력하는 방법
-            children: todaySchedules
-                .map(
-                  (house) => Text(
-                    '이름 : ${house.name} / 주소 : ${house.address} / 메모 : ${house.description}',
-                    style: const TextStyle(
-                      color: Colors.white,
-                    ),
-                  ),
-                )
-                .toList(),
-          ),
-        ],
-      ),
+        ),
+        // Container(
+        //   color: Colors.white,
+        //   width: 600,
+        //   height: 500,
+        //   child: Column(
+        //     // 리스트를 wiget형태로 출력하는 방법
+        //     children: todaySchedules
+        //         .map(
+        //           (house) => Text(
+        //             '이름 : ${house.name} / 주소 : ${house.address} / 메모 : ${house.description}',
+        //             style: const TextStyle(
+        //               color: Colors.white,
+        //             ),
+        //           ),
+        //         )
+        //         .toList(),
+        //   ),
+        // ),
+      ],
     );
   }
 }
