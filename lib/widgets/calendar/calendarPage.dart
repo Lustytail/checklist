@@ -1,6 +1,9 @@
+import 'dart:js_interop';
+
 import 'package:flutter/material.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:table_calendar/table_calendar.dart';
+import 'package:wyeta/hive/schedule.dart';
 
 import '../../hive/house.dart';
 
@@ -12,24 +15,48 @@ class CalendarPage extends StatefulWidget {
 }
 
 class _CalenarState extends State<CalendarPage> {
+  final box = Hive.box<Schedule>('schedule');
   DateTime selectedDay = DateTime.now();
   DateTime focusedDay = DateTime.now();
-
-  Map<DateTime, List<Event>> events = {
-    DateTime.utc(2023, 8, 25): [Event('title'), Event('title2')],
-    DateTime.utc(2023, 8, 15): [Event('title3')],
-  };
+  List<House> todaySchedules = [];
 
   final List<DateTime> _hoildays = [DateTime.utc(2023, 8, 15)];
 
-  List<Event> _getEvents(DateTime day) {
-    return events[day] ?? [];
+  List<House> _getSchedules(DateTime day) {
+    var temp = box.get(day.toString());
+    return temp?.list ?? [];
+  }
+
+  List<Widget> getScheduleList() {
+    List<Widget> list = [];
+
+    for (var house in todaySchedules) {
+      list.add(Text(
+        '이름 : ${house.name} / 주소 : ${house.address} / 메모 : ${house.description}',
+      ));
+    }
+    return list;
+  }
+
+  @override
+  void initState() {
+    String date = DateTime.utc(
+      DateTime.now().year,
+      DateTime.now().month,
+      DateTime.now().day,
+    ).toString();
+
+    if (!box.get(date)!.list.isNull) {
+      todaySchedules = box.get(date)!.list!;
+    }
+    super.initState();
   }
 
   @override
   Widget build(BuildContext context) {
-    final box = Hive.box<House>('house');
-    List<House> temp = box.values.toList();
+    if (!box.get(selectedDay.toString()).isNull) {
+      todaySchedules = box.get(selectedDay.toString())!.list!;
+    }
 
     return SingleChildScrollView(
       scrollDirection: Axis.vertical,
@@ -77,20 +104,27 @@ class _CalenarState extends State<CalendarPage> {
               locale: 'ko-KR',
               firstDay: DateTime.utc(2021, 1, 1),
               lastDay: DateTime.utc(2030, 12, 31),
-              daysOfWeekHeight: 30,
+              daysOfWeekHeight: 25,
+              rowHeight: 50,
               focusedDay: selectedDay,
               onDaySelected: (selectedDay, focusedDay) {
                 setState(
                   () {
                     this.selectedDay = selectedDay;
                     this.focusedDay = focusedDay;
+
+                    if (!box.get(selectedDay.toString()).isNull) {
+                      todaySchedules = box.get(selectedDay.toString())!.list!;
+                    } else {
+                      todaySchedules = [];
+                    }
                   },
                 );
               },
               selectedDayPredicate: (day) {
                 return isSameDay(selectedDay, day);
               },
-              eventLoader: _getEvents,
+              eventLoader: _getSchedules,
               holidayPredicate: (day) {
                 return _hoildays.contains(day) ? true : false;
               },
@@ -98,7 +132,7 @@ class _CalenarState extends State<CalendarPage> {
           ),
           Column(
             // 리스트를 wiget형태로 출력하는 방법
-            children: temp
+            children: todaySchedules
                 .map(
                   (house) => Text(
                     '이름 : ${house.name} / 주소 : ${house.address} / 메모 : ${house.description}',
@@ -113,11 +147,4 @@ class _CalenarState extends State<CalendarPage> {
       ),
     );
   }
-}
-
-class Event {
-  String title;
-  String? description;
-
-  Event(this.title, {this.description});
 }
