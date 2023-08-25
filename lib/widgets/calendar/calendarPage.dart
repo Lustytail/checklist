@@ -6,6 +6,7 @@ import 'package:table_calendar/table_calendar.dart';
 import 'package:wyeta/hive/schedule.dart';
 
 import '../../hive/house.dart';
+import 'createSchedule.dart';
 
 class CalendarPage extends StatefulWidget {
   const CalendarPage({super.key});
@@ -33,9 +34,6 @@ class _CalenarState extends State<CalendarPage> {
     selectedDay = date;
     focusedDay = date;
 
-    if (!box.get(date.toString())!.list.isNull) {
-      todaySchedules = box.get(date.toString())!.list!;
-    }
     super.initState();
   }
 
@@ -44,28 +42,15 @@ class _CalenarState extends State<CalendarPage> {
     return temp?.list ?? [];
   }
 
-  List<Widget> getScheduleList() {
-    List<Widget> list = [];
-
-    for (var house in todaySchedules) {
-      list.add(Text(
-        '이름 : ${house.name} / 주소 : ${house.address} / 메모 : ${house.description}',
-      ));
-    }
-    return list;
-  }
-
   void popUp() {
-    List<House>? list = box.get(selectedDay.toString())!.list;
-
     showDialog(
       context: context,
       builder: (context) {
         return AlertDialog(
-          contentPadding: const EdgeInsets.symmetric(
-            vertical: 5,
-            horizontal: 5,
-          ),
+          // contentPadding: const EdgeInsets.symmetric(
+          //   vertical: 5,
+          //   horizontal: 5,
+          // ),
           title: Container(
             alignment: Alignment.center,
             child: const Text('임장 계획 리스트'),
@@ -73,21 +58,231 @@ class _CalenarState extends State<CalendarPage> {
           content: Container(
             width: 400,
             height: 450,
-            color: Colors.black,
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(10),
+            ),
             child: SingleChildScrollView(
               scrollDirection: Axis.vertical,
               child: Column(
                 children: todaySchedules
                     .map(
-                      (house) => Text(
-                        '이름 : ${house.name} / 주소 : ${house.address} / 메모 : ${house.description}',
-                        style: const TextStyle(
-                          color: Colors.white,
+                      (house) => GestureDetector(
+                        onTap: () => Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => const CreateSchedule(),
+                          ),
+                        ),
+                        child: Container(
+                          margin: const EdgeInsets.symmetric(
+                            vertical: 3,
+                          ),
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(4),
+                            color: const Color.fromARGB(255, 175, 240, 178),
+                          ),
+                          padding: const EdgeInsets.symmetric(
+                            vertical: 5,
+                            horizontal: 5,
+                          ),
+                          width: double.infinity,
+                          child: Row(
+                            children: [
+                              Container(
+                                alignment: Alignment.center,
+                                width: 90,
+                                height: 90,
+                                color: Colors.blueGrey,
+                                child: const Text('IMAGE???'),
+                              ),
+                              Flexible(
+                                fit: FlexFit.tight,
+                                child: Padding(
+                                  padding: const EdgeInsets.all(8.0),
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        // 임장 계획 - 이름
+                                        house.name,
+                                        style: const TextStyle(
+                                          color:
+                                              Color.fromARGB(255, 51, 51, 51),
+                                          fontSize: 25,
+                                          fontWeight: FontWeight.w700,
+                                        ),
+                                      ),
+                                      Text(
+                                        // 임장 계획 - 주소
+                                        house.address,
+                                        style: const TextStyle(
+                                          color: Color.fromARGB(
+                                              255, 132, 132, 132),
+                                          fontSize: 12,
+                                        ),
+                                      ),
+                                      Padding(
+                                        padding: const EdgeInsets.symmetric(
+                                            vertical: 8),
+                                        child: Text(
+                                          // 임장 계획 - 설명
+                                          house.description ?? '',
+                                          style: const TextStyle(
+                                            color: Color.fromARGB(
+                                                255, 255, 255, 255),
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
                         ),
                       ),
                     )
                     .toList(),
               ),
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  void showModal() {
+    showModalBottomSheet(
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      isScrollControlled: true,
+      context: context,
+      builder: (BuildContext context) {
+        return SizedBox(
+          height: 450, // 모달 높이 크기
+          child: Container(
+            // width: 400,
+            // height: 450,
+            margin: const EdgeInsets.symmetric(
+              vertical: 15,
+              horizontal: 30,
+            ),
+            child: Column(
+              children: [
+                Column(
+                  children: [
+                    Container(
+                      margin: const EdgeInsets.symmetric(vertical: 10),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.end,
+                        children: [
+                          const Text(
+                            'tests',
+                            style: TextStyle(
+                              fontSize: 20,
+                              fontWeight: FontWeight.w700,
+                            ),
+                          ),
+                          const Flexible(fit: FlexFit.tight, child: SizedBox()),
+                          GestureDetector(
+                            onTap: () {},
+                            child: const Icon(Icons.add, size: 40),
+                          ),
+                        ],
+                      ),
+                    )
+                  ],
+                ),
+                Flexible(
+                  flex: 1,
+                  child: SingleChildScrollView(
+                    scrollDirection: Axis.vertical,
+                    child: Column(
+                      children: todaySchedules
+                          .map(
+                            (house) => GestureDetector(
+                              onTap: () => Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (_) => const CreateSchedule(),
+                                ),
+                              ),
+                              child: Container(
+                                margin: const EdgeInsets.symmetric(
+                                  vertical: 3,
+                                ),
+                                padding: const EdgeInsets.symmetric(
+                                  vertical: 5,
+                                  horizontal: 5,
+                                ),
+                                width: double.infinity,
+                                child: Row(
+                                  children: [
+                                    Container(
+                                      // 이미지 블록
+                                      alignment: Alignment.center,
+                                      width: 70,
+                                      height: 70,
+                                      color: Colors.blueGrey,
+                                      child: const Text('IMAGE???'),
+                                    ),
+                                    Flexible(
+                                      fit: FlexFit.tight,
+                                      child: Padding(
+                                        padding: const EdgeInsets.all(8.0),
+                                        child: Column(
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
+                                          children: [
+                                            Text(
+                                              // 임장 계획 - 이름
+                                              house.name,
+                                              style: const TextStyle(
+                                                color: Color.fromARGB(
+                                                    255, 51, 51, 51),
+                                                fontSize: 17,
+                                                fontWeight: FontWeight.w700,
+                                              ),
+                                            ),
+                                            Text(
+                                              // 임장 계획 - 주소
+                                              house.address,
+                                              style: const TextStyle(
+                                                color: Color.fromARGB(
+                                                    255, 132, 132, 132),
+                                                fontSize: 10,
+                                              ),
+                                            ),
+                                            Container(
+                                              margin:
+                                                  const EdgeInsets.symmetric(
+                                                      vertical: 4),
+                                              child: Text(
+                                                // 임장 계획 - 설명
+                                                house.description ?? '',
+                                                style: const TextStyle(
+                                                  fontSize: 12,
+                                                  color: Color.fromARGB(
+                                                      255, 102, 102, 102),
+                                                ),
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          )
+                          .toList(),
+                    ),
+                  ),
+                ),
+              ],
             ),
           ),
         );
@@ -101,18 +296,18 @@ class _CalenarState extends State<CalendarPage> {
       todaySchedules = box.get(selectedDay.toString())!.list!;
     }
 
-    return Column(
-      children: [
-        Flexible(
-          flex: 1,
-          child: Container(
-            color: Colors.white,
+    return Container(
+      color: Colors.white,
+      child: Column(
+        children: [
+          Flexible(
+            flex: 1,
             child: TableCalendar(
               headerStyle: const HeaderStyle(
                 titleCentered: true,
                 formatButtonVisible: false,
                 headerPadding: EdgeInsets.symmetric(
-                  vertical: 20,
+                  vertical: 10,
                 ),
               ),
               calendarStyle: CalendarStyle(
@@ -149,15 +344,16 @@ class _CalenarState extends State<CalendarPage> {
               ),
               locale: 'ko-KR',
               firstDay: DateTime.utc(2021, 1, 1),
-              lastDay: DateTime.utc(2030, 12, 31),
+              lastDay: DateTime.utc(2060, 12, 31),
               daysOfWeekHeight: 25,
-              rowHeight: 60,
+              rowHeight: 50,
               focusedDay: selectedDay,
               onDaySelected: (selectedDay, focusedDay) {
                 setState(
                   () {
                     if (this.selectedDay == selectedDay) {
-                      popUp();
+                      //popUp();
+                      showModal();
                     } else {
                       this.selectedDay = selectedDay;
                       this.focusedDay = focusedDay;
@@ -180,26 +376,8 @@ class _CalenarState extends State<CalendarPage> {
               },
             ),
           ),
-        ),
-        // Container(
-        //   color: Colors.white,
-        //   width: 600,
-        //   height: 500,
-        //   child: Column(
-        //     // 리스트를 wiget형태로 출력하는 방법
-        //     children: todaySchedules
-        //         .map(
-        //           (house) => Text(
-        //             '이름 : ${house.name} / 주소 : ${house.address} / 메모 : ${house.description}',
-        //             style: const TextStyle(
-        //               color: Colors.white,
-        //             ),
-        //           ),
-        //         )
-        //         .toList(),
-        //   ),
-        // ),
-      ],
+        ],
+      ),
     );
   }
 }

@@ -36,11 +36,13 @@ void main() async {
     Schedule(
       date: DateTime.utc(2023, 8, 15),
       list: [
-        House(name: 'xi', address: 'seoul mapogu', description: 'hello test'),
         House(
-            name: 'xi2', address: 'seoul mapogu2', description: 'hello test2'),
+            name: 'xi', address: 'seoul mapogu', description: '내가 정말 가고 싶은 동네'),
         House(
-            name: 'xi3', address: 'seoul mapogu3', description: 'hello test3'),
+            name: 'xi2',
+            address: 'seoul mapogu2',
+            description: '현실적으로 갈 수 있는 곳'),
+        House(name: 'xi3', address: 'seoul mapogu3', description: '한번 구경해볼 집'),
       ],
     ),
   );
@@ -49,11 +51,35 @@ void main() async {
     Schedule(
       date: DateTime.utc(2023, 8, 24),
       list: [
-        House(name: 'hey', address: 'seoul mapogu', description: 'hello test'),
         House(
-            name: 'hey2', address: 'seoul mapogu2', description: 'hello test2'),
+          name: '궁궐',
+          address: '서울시 강남구 1로',
+          description: '여기 너무 살고 싶다 ㅠ',
+        ),
         House(
-            name: 'hey3', address: 'seoul mapogu3', description: 'hello test3'),
+            name: 'NineOne',
+            address: '서울시 한남동',
+            description: '지나가는길에 눈에 들어온 집'),
+        House(
+          name: '경복궁',
+          address: '서울시 광화문로',
+          description: '부동산에서 추천해 준 곳',
+        ),
+        House(
+          name: 'ABc',
+          address: '서울시 123로',
+          description: '예비리스트',
+        ),
+        House(
+          name: '123123',
+          address: '서울시 B대로',
+          description: '부예비리스트',
+        ),
+        House(
+          name: '5555555555',
+          address: '서울시 A대로',
+          description: '예비리스트',
+        ),
       ],
     ),
   );
