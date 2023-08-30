@@ -1,8 +1,12 @@
+import 'dart:js_interop';
+
 import 'package:flutter/material.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:table_calendar/table_calendar.dart';
+import 'package:wyeta/hive/schedule.dart';
 
 import '../../hive/house.dart';
+import 'scheduleModal.dart';
 
 class CalendarPage extends StatefulWidget {
   const CalendarPage({super.key});
@@ -12,35 +16,175 @@ class CalendarPage extends StatefulWidget {
 }
 
 class _CalenarState extends State<CalendarPage> {
-  DateTime selectedDay = DateTime.now();
-  DateTime focusedDay = DateTime.now();
-
-  Map<DateTime, List<Event>> events = {
-    DateTime.utc(2023, 8, 25): [Event('title'), Event('title2')],
-    DateTime.utc(2023, 8, 15): [Event('title3')],
-  };
+  final box = Hive.box<Schedule>('schedule');
+  late DateTime selectedDay;
+  late DateTime focusedDay;
+  List<House> todaySchedules = [];
 
   final List<DateTime> _hoildays = [DateTime.utc(2023, 8, 15)];
 
-  List<Event> _getEvents(DateTime day) {
-    return events[day] ?? [];
+  @override
+  void initState() {
+    DateTime date = DateTime.utc(
+      DateTime.now().year,
+      DateTime.now().month,
+      DateTime.now().day,
+    );
+
+    selectedDay = date;
+    focusedDay = date;
+
+    super.initState();
+  }
+
+  List<House> _getSchedules(DateTime day) {
+    var temp = box.get(day.toString());
+    return temp?.list ?? [];
+  }
+
+// 미사용중인 메서드
+  void popUp() {
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          // contentPadding: const EdgeInsets.symmetric(
+          //   vertical: 5,
+          //   horizontal: 5,
+          // ),
+          title: Container(
+            alignment: Alignment.center,
+            child: const Text('임장 계획 리스트'),
+          ),
+          content: Container(
+            width: 400,
+            height: 450,
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(10),
+            ),
+            child: SingleChildScrollView(
+              scrollDirection: Axis.vertical,
+              child: Column(
+                children: todaySchedules
+                    .map(
+                      (house) => GestureDetector(
+                        onTap: () => Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => const CreateSchedule(),
+                          ),
+                        ),
+                        child: Container(
+                          margin: const EdgeInsets.symmetric(
+                            vertical: 3,
+                          ),
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(4),
+                            color: const Color.fromARGB(255, 175, 240, 178),
+                          ),
+                          padding: const EdgeInsets.symmetric(
+                            vertical: 5,
+                            horizontal: 5,
+                          ),
+                          width: double.infinity,
+                          child: Row(
+                            children: [
+                              Container(
+                                alignment: Alignment.center,
+                                width: 90,
+                                height: 90,
+                                color: Colors.blueGrey,
+                                child: const Text('IMAGE???'),
+                              ),
+                              Flexible(
+                                fit: FlexFit.tight,
+                                child: Padding(
+                                  padding: const EdgeInsets.all(8.0),
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        // 임장 계획 - 이름
+                                        house.name,
+                                        style: const TextStyle(
+                                          color:
+                                              Color.fromARGB(255, 51, 51, 51),
+                                          fontSize: 25,
+                                          fontWeight: FontWeight.w700,
+                                        ),
+                                      ),
+                                      Text(
+                                        // 임장 계획 - 주소
+                                        house.address,
+                                        style: const TextStyle(
+                                          color: Color.fromARGB(
+                                              255, 132, 132, 132),
+                                          fontSize: 12,
+                                        ),
+                                      ),
+                                      Padding(
+                                        padding: const EdgeInsets.symmetric(
+                                            vertical: 8),
+                                        child: Text(
+                                          // 임장 계획 - 설명
+                                          house.description ?? '',
+                                          style: const TextStyle(
+                                            color: Color.fromARGB(
+                                                255, 255, 255, 255),
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    )
+                    .toList(),
+              ),
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  void showModal() {
+    showModalBottomSheet(
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      isScrollControlled: true,
+      context: context,
+      builder: (BuildContext context) {
+        return ScheduleList(todaySchedules: todaySchedules);
+      },
+    );
   }
 
   @override
   Widget build(BuildContext context) {
-    final box = Hive.box<House>('house');
-    List<House> temp = box.values.toList();
+    if (!box.get(selectedDay.toString()).isNull) {
+      todaySchedules = box.get(selectedDay.toString())!.list!;
+    }
 
-    return SingleChildScrollView(
-      scrollDirection: Axis.vertical,
+    return Container(
+      color: Colors.white,
       child: Column(
         children: [
-          Container(
-            color: Colors.white,
+          Flexible(
+            flex: 1,
             child: TableCalendar(
               headerStyle: const HeaderStyle(
                 titleCentered: true,
                 formatButtonVisible: false,
+                headerPadding: EdgeInsets.symmetric(
+                  vertical: 10,
+                ),
               ),
               calendarStyle: CalendarStyle(
                 defaultTextStyle: const TextStyle(
@@ -76,48 +220,40 @@ class _CalenarState extends State<CalendarPage> {
               ),
               locale: 'ko-KR',
               firstDay: DateTime.utc(2021, 1, 1),
-              lastDay: DateTime.utc(2030, 12, 31),
-              daysOfWeekHeight: 30,
+              lastDay: DateTime.utc(2060, 12, 31),
+              daysOfWeekHeight: 25,
+              rowHeight: 50,
               focusedDay: selectedDay,
               onDaySelected: (selectedDay, focusedDay) {
                 setState(
                   () {
-                    this.selectedDay = selectedDay;
-                    this.focusedDay = focusedDay;
+                    if (this.selectedDay == selectedDay) {
+                      //popUp();
+                      showModal();
+                    } else {
+                      this.selectedDay = selectedDay;
+                      this.focusedDay = focusedDay;
+
+                      if (!box.get(selectedDay.toString()).isNull) {
+                        todaySchedules = box.get(selectedDay.toString())!.list!;
+                      } else {
+                        todaySchedules = [];
+                      }
+                    }
                   },
                 );
               },
               selectedDayPredicate: (day) {
                 return isSameDay(selectedDay, day);
               },
-              eventLoader: _getEvents,
+              eventLoader: _getSchedules,
               holidayPredicate: (day) {
                 return _hoildays.contains(day) ? true : false;
               },
             ),
           ),
-          Column(
-            // 리스트를 wiget형태로 출력하는 방법
-            children: temp
-                .map(
-                  (house) => Text(
-                    '이름 : ${house.name} / 주소 : ${house.address} / 메모 : ${house.description}',
-                    style: const TextStyle(
-                      color: Colors.white,
-                    ),
-                  ),
-                )
-                .toList(),
-          ),
         ],
       ),
     );
   }
-}
-
-class Event {
-  String title;
-  String? description;
-
-  Event(this.title, {this.description});
 }
