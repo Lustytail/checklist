@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 
 import 'calendar/calendarMenu.dart';
 import 'calendar/calendarPage.dart';
-import 'checklist/ChecklistPage.dart';
 import 'checklist/checklistMenu.dart';
+import 'checklist/checklistPage.dart';
 import 'home/homeMenu.dart';
 import 'home/homePage.dart';
 
