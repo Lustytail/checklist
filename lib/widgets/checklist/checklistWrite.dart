@@ -48,7 +48,10 @@ class _ChecklistWriteState extends State<ChecklistWrite> {
               ),
             ],
           ),
-          /* TODO 국가 주소 검색 연동
+          Container(
+            child: Column(
+              children: [
+                /* TODO 국가 주소 검색 연동
           Container(
             alignment: Alignment.center,
             child: Container(
@@ -85,44 +88,96 @@ class _ChecklistWriteState extends State<ChecklistWrite> {
               ),
             ),
           ),*/
-          const Row(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              SizedBox(
-                width: 20,
-              ),
-              Text('매매금 '),
-              SizedBox(
-                width: 20,
-              ),
-              SizedBox(
-                width: 80,
-                child: TextField(
-                  textDirection: TextDirection.rtl,
-                  decoration: InputDecoration(
-                    hintText: '전세금 입력',
-                    border: InputBorder.none,
-                  ),
+                const Row(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    SizedBox(
+                      width: 20,
+                    ),
+                    Text('매매금'),
+                    SizedBox(
+                      width: 20,
+                    ),
+                    SizedBox(
+                      width: 80,
+                      child: TextField(
+                        textDirection: TextDirection.rtl,
+                        decoration: InputDecoration(
+                          hintText: '매매금액 입력',
+                          border: InputBorder.none,
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
-              ),
-            ],
-          ),
-          Row(
-            children: [
-              const SizedBox(
-                height: 10,
-              ),
-              TextButton(
-                onPressed: () {},
-                child: const Text(
-                  '임장 날짜 등록',
-                  style: TextStyle(
-                    fontSize: 18,
-                    color: Colors.white,
-                  ),
+                const Row(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    SizedBox(
+                      width: 20,
+                    ),
+                    Text('평형'),
+                    SizedBox(
+                      width: 20,
+                    ),
+                    SizedBox(
+                      width: 80,
+                      child: TextField(
+                        textDirection: TextDirection.rtl,
+                        decoration: InputDecoration(
+                          hintText: '평형 입력',
+                          border: InputBorder.none,
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
-              ),
-            ],
+                const Row(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    SizedBox(
+                      width: 20,
+                    ),
+                    Text('방/화장실 갯수'),
+                    SizedBox(
+                      width: 20,
+                    ),
+                    SizedBox(
+                      width: 80,
+                      child: TextField(
+                        textDirection: TextDirection.rtl,
+                        decoration: InputDecoration(
+                          hintText: '방3 ',
+                          border: InputBorder.none,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    const SizedBox(
+                      height: 10,
+                    ),
+                    TextButton(
+                      style: ButtonStyle(
+                        backgroundColor:
+                            MaterialStateProperty.all<Color>(Colors.blue),
+                      ),
+                      onPressed: () {},
+                      child: const Text(
+                        '임장 날짜 등록',
+                        style: TextStyle(
+                          fontSize: 18,
+                          color: Colors.white,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
           ),
           Expanded(
             child: ListView(
@@ -199,7 +254,7 @@ class _ChecklistWriteState extends State<ChecklistWrite> {
                     initiallyExpanded: expanded,
                     title: Text('1. 임장가서 체크리스트 $expanded'),
                     children: const <Widget>[
-                      ListTile(title: Text('This is tile number 1')),
+                      CustomListTile(),
                     ],
                   ),
                 ),

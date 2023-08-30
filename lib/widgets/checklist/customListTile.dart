@@ -12,6 +12,9 @@ class CustomListTile extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           const Text('1. 주요 도심지 까지의 접근성은?'),
+          const SizedBox(
+            height: 10,
+          ),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: [
@@ -37,6 +40,9 @@ class CustomListTile extends StatelessWidget {
                   onPressed: () {},
                   child: const Text('나빠요')),
             ],
+          ),
+          const SizedBox(
+            height: 10,
           ),
           const TextField(
             decoration: InputDecoration(
