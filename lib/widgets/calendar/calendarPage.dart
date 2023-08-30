@@ -1,5 +1,3 @@
-import 'dart:js_interop';
-
 import 'package:flutter/material.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:table_calendar/table_calendar.dart';
@@ -168,7 +166,7 @@ class _CalenarState extends State<CalendarPage> {
 
   @override
   Widget build(BuildContext context) {
-    if (!box.get(selectedDay.toString()).isNull) {
+    if (box.get(selectedDay.toString()) != null) {
       todaySchedules = box.get(selectedDay.toString())!.list!;
     }
 
@@ -234,7 +232,7 @@ class _CalenarState extends State<CalendarPage> {
                       this.selectedDay = selectedDay;
                       this.focusedDay = focusedDay;
 
-                      if (!box.get(selectedDay.toString()).isNull) {
+                      if (box.get(selectedDay.toString()) != null) {
                         todaySchedules = box.get(selectedDay.toString())!.list!;
                       } else {
                         todaySchedules = [];
