@@ -7,7 +7,7 @@ class ChecklistMenu extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       height: 60,
-      color: const Color.fromARGB(255, 101, 101, 101),
+      color: const Color.fromARGB(254, 254, 254, 254),
       child: const Padding(
         padding: EdgeInsets.symmetric(horizontal: 10),
         child: Row(
@@ -16,7 +16,7 @@ class ChecklistMenu extends StatelessWidget {
               'Check List Menu',
               style: TextStyle(
                 fontSize: 25,
-                color: Color.fromARGB(255, 231, 231, 231),
+                color: Color.fromARGB(255, 31, 31, 31),
               ),
             ),
           ],

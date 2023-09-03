@@ -5,6 +5,12 @@ import 'package:hive_flutter/hive_flutter.dart';
 // 사용방법 : context.read<GlobalValue>().str
 //                          클래스명     getter 함수명
 class GlobalValue extends ChangeNotifier {
-  String _str = "test";
+  final String _str = "test";
   String get str => _str;
+
+  DateTime date = DateTime.utc(
+    DateTime.now().year,
+    DateTime.now().month,
+    DateTime.now().day,
+  );
 }

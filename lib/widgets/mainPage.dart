@@ -32,14 +32,14 @@ class _MainPageState extends State<MainPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.black,
+      backgroundColor: const Color.fromARGB(255, 255, 255, 255),
       appBar: AppBar(
-        backgroundColor: const Color.fromARGB(255, 101, 101, 101),
+        backgroundColor: const Color.fromARGB(254, 254, 254, 254),
         title: _topWidget[_currentIndex],
       ),
       body: _bodyWidget[_currentIndex],
       bottomNavigationBar: BottomNavigationBar(
-        backgroundColor: const Color.fromARGB(255, 101, 101, 101),
+        backgroundColor: const Color.fromARGB(254, 254, 254, 254),
         selectedItemColor: const Color.fromARGB(222, 187, 187, 255),
         showUnselectedLabels: false,
         elevation: 5,

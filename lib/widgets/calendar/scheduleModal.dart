@@ -1,11 +1,36 @@
 import 'package:flutter/material.dart';
+import 'package:hive/hive.dart';
+import 'package:provider/provider.dart';
 
 import '../../hive/house.dart';
+import '../../hive/schedule.dart';
+import '../../provider/provider.dart';
+import '../checklist/checklistWrite.dart';
 
-class ScheduleList extends StatelessWidget {
-  final List<House> todaySchedules;
+class ScheduleList extends StatefulWidget {
+  final StateSetter bottomState;
+  final DateTime selectedDay;
 
-  const ScheduleList({super.key, required this.todaySchedules});
+  const ScheduleList(
+      {super.key, required this.selectedDay, required this.bottomState});
+
+  @override
+  State<StatefulWidget> createState() => _ScheduleState();
+}
+
+class _ScheduleState extends State<ScheduleList> {
+  final box = Hive.box<Schedule>('schedule');
+  List<House> todaySchedules = [];
+
+  @override
+  void initState() {
+    if (box.get(widget.selectedDay.toString())?.list == null) {
+      todaySchedules = [];
+    } else {
+      todaySchedules = box.get(widget.selectedDay.toString())!.list!;
+    }
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -36,7 +61,20 @@ class ScheduleList extends StatelessWidget {
                       ),
                       const Flexible(fit: FlexFit.tight, child: SizedBox()),
                       GestureDetector(
-                        onTap: () {},
+                        onTap: () async {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => ChecklistWrite(
+                                  date: context.read<GlobalValue>().date),
+                            ),
+                          );
+
+                          widget.bottomState(() {
+                            todaySchedules =
+                                box.get(widget.selectedDay.toString())!.list!;
+                          });
+                        },
                         child: const Icon(Icons.add, size: 40),
                       ),
                     ],

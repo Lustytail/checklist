@@ -3,7 +3,8 @@ import 'package:flutter/material.dart';
 import 'customListTile.dart';
 
 class ChecklistWrite extends StatefulWidget {
-  const ChecklistWrite({super.key});
+  final DateTime? date;
+  const ChecklistWrite({super.key, this.date});
 
   @override
   State<ChecklistWrite> createState() => _ChecklistWriteState();
