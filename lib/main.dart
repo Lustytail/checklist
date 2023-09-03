@@ -1,18 +1,46 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:hive_flutter/hive_flutter.dart';
-import 'package:wyeta/hive/house.dart';
-import 'package:wyeta/hive/schedule.dart';
-import 'widgets/mainPage.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:provider/provider.dart';
+import 'package:wyeta/hive/house.dart';
+import 'package:wyeta/hive/question.dart';
+import 'package:wyeta/hive/schedule.dart';
+
 import '../../provider/provider.dart';
+import 'widgets/mainPage.dart';
 
 void main() async {
   await Hive.initFlutter();
+  // Hive 모델 어댑터 등록
   Hive.registerAdapter(HouseAdapter());
   Hive.registerAdapter(ScheduleAdapter());
+  Hive.registerAdapter(QuestionAdapter());
   final houseBox = await Hive.openBox<House>('house');
   final scheduleBox = await Hive.openBox<Schedule>('schedule');
+  // Hive 박스 열기만 함!
+  await Hive.openBox<Question>('question');
+
+// assets 폴더에서 JSON 파일을 읽어옴
+  final String data = await rootBundle.loadString('assets/questionData.json');
+  final List<dynamic> parsedData = json.decode(data);
+
+  //처음에 insertBox 가 비어있으면 데이터를 넣어줌
+  final insertBox = await Hive.openBox<Question>('question');
+  if (insertBox.isEmpty) {
+    insertBox.addAll(
+      parsedData.map(
+        (json) => Question(
+          id: json['id'],
+          type: json['type'],
+          name: json['name'],
+          description: json['description'],
+        ),
+      ),
+    );
+  }
 
   // DB 쿼리하고 싶은 위젯에서
   // 아래 명령어처럼 열어둔 box를 가져온 후 box변수를 가지고 쿼리 수행

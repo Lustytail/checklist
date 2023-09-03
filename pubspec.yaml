@@ -42,6 +42,7 @@ dependencies:
   hive_flutter: ^1.0.0
 
   file_picker: ^5.3.4
+  image_picker: ^1.0.4
 
 dev_dependencies:
   flutter_test:
@@ -63,6 +64,7 @@ dev_dependencies:
 flutter:
   assets:
     - assets/
+    - assets/questionData.json
 
   # The following line ensures that the Material Icons font is
   # included with your application, so that you can use the icons in

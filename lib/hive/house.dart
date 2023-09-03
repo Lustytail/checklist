@@ -17,5 +17,21 @@ class House {
   @HiveField(2)
   String? description;
 
-  House({required this.name, required this.address, this.description});
+  @HiveField(3)
+  String? price;
+
+  @HiveField(4)
+  String? size;
+
+  @HiveField(5)
+  String? structure;
+
+  House({
+    required this.name,
+    required this.address,
+    this.description,
+    this.price,
+    this.size,
+    this.structure,
+  });
 }
