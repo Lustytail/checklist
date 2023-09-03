@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:hive/hive.dart';
 import 'package:image_picker/image_picker.dart';
-
-import 'customListTile.dart';
+import 'package:wyeta/hive/question.dart';
+import 'package:wyeta/widgets/checklist/customListTile.dart';
 
 class ChecklistWrite extends StatefulWidget {
   const ChecklistWrite({super.key});
@@ -25,13 +26,25 @@ class _ChecklistWriteState extends State<ChecklistWrite> {
     final screenWidth = MediaQuery.of(context).size.width;
     final columnCount =
         (screenWidth / 150).floor(); // Adjust the item width (150) as needed
+    final questionData = Hive.box<Question>('question');
+
+    final firstQuestion =
+        questionData.values.where((element) => element.type == 0).toList();
+    final secondQuestion =
+        questionData.values.where((element) => element.type == 1).toList();
     return Scaffold(
+      appBar: AppBar(
+        title: const Text('임장 체크리스트 작성'),
+        actions: [
+          IconButton(
+            onPressed: () {},
+            icon: const Icon(Icons.save),
+          ),
+        ],
+      ),
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const SizedBox(
-            height: 100,
-          ),
           const Row(
             children: [
               SizedBox(
@@ -219,24 +232,22 @@ class _ChecklistWriteState extends State<ChecklistWrite> {
                 ExpansionTile(
                   title: const Text('0. 임장전 체크리스트'),
                   initiallyExpanded: !expanded,
-                  children: const <Widget>[
-                    CustomListTile(question: '1. 해당 매물의 세대 규모는?'),
-                    CustomListTile(question: '2. 주요 도심지 까지의 접근성은?'),
-                    CustomListTile(question: '3. 직장, 학교, 병원 등의 접근성은?'),
-                    CustomListTile(question: '4. 교통인프라의 접근성/편의성은?'),
-                    CustomListTile(question: '5. 학원가와 초등/중등 학교의 학군은?'),
-                    CustomListTile(question: '6. 해당지역의 발전 가능성은?'),
-                    CustomListTile(question: '7. 권역 내에서 해당 매물의 소득 수준은?'),
-                  ],
+                  children: List.generate(
+                    firstQuestion.length,
+                    (index) => CustomListTile(
+                        question:
+                            '${firstQuestion[index].id + 1}. ${firstQuestion[index].name}'),
+                  ),
                 ),
                 ExpansionTile(
                   initiallyExpanded: expanded,
                   title: const Text('1. 임장가서 체크리스트'),
-                  children: const <Widget>[
-                    CustomListTile(question: '1. 집까지 가는길이 어떤가요?'),
-                    CustomListTile(question: '2. 동네의 분위기는 어떤가요?'),
-                    CustomListTile(question: '3. 동네 근처에 편의점이나 병원같은 편의시설이 가깝나요?')
-                  ],
+                  children: List.generate(
+                    secondQuestion.length,
+                    (index) => CustomListTile(
+                        question:
+                            '${secondQuestion[index].id + 1}. ${secondQuestion[index].name}'),
+                  ),
                 ),
                 GridView.builder(
                   itemCount: 6,
