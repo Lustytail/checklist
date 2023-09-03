@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 
 class CustomListTile extends StatelessWidget {
+  final String question;
   const CustomListTile({
     super.key,
+    required this.question,
   });
 
   @override
@@ -11,7 +13,7 @@ class CustomListTile extends StatelessWidget {
       title: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text('1. 주요 도심지 까지의 접근성은?'),
+          Text(question),
           const SizedBox(
             height: 10,
           ),

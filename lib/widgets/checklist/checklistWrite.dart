@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
 
 import 'customListTile.dart';
 
@@ -47,7 +48,7 @@ class _ChecklistWriteState extends State<ChecklistWrite> {
           ),
           Row(
             children: [
-              const Flexible(
+              Flexible(
                 fit: FlexFit.tight,
                 flex: 2,
                 child: Column(
@@ -92,18 +93,19 @@ class _ChecklistWriteState extends State<ChecklistWrite> {
                     Row(
                       crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
-                        SizedBox(
+                        const SizedBox(
                           width: 20,
                         ),
-                        Text('매매금'),
-                        SizedBox(
+                        const Text('매매금'),
+                        const SizedBox(
                           width: 20,
                         ),
                         SizedBox(
                           width: 80,
                           child: TextField(
-                            textDirection: TextDirection.rtl,
-                            decoration: InputDecoration(
+                            focusNode: FocusNode(),
+                            textDirection: TextDirection.ltr,
+                            decoration: const InputDecoration(
                               hintText: '매매금액 입력',
                               border: InputBorder.none,
                             ),
@@ -111,7 +113,7 @@ class _ChecklistWriteState extends State<ChecklistWrite> {
                         ),
                       ],
                     ),
-                    Row(
+                    const Row(
                       crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
                         SizedBox(
@@ -124,7 +126,7 @@ class _ChecklistWriteState extends State<ChecklistWrite> {
                         SizedBox(
                           width: 80,
                           child: TextField(
-                            textDirection: TextDirection.rtl,
+                            textDirection: TextDirection.ltr,
                             decoration: InputDecoration(
                               hintText: '평형 입력',
                               border: InputBorder.none,
@@ -133,7 +135,7 @@ class _ChecklistWriteState extends State<ChecklistWrite> {
                         ),
                       ],
                     ),
-                    Row(
+                    const Row(
                       crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
                         SizedBox(
@@ -146,7 +148,7 @@ class _ChecklistWriteState extends State<ChecklistWrite> {
                         SizedBox(
                           width: 80,
                           child: TextField(
-                            textDirection: TextDirection.rtl,
+                            textDirection: TextDirection.ltr,
                             decoration: InputDecoration(
                               hintText: '방3 ',
                               border: InputBorder.none,
@@ -217,66 +219,23 @@ class _ChecklistWriteState extends State<ChecklistWrite> {
                 ExpansionTile(
                   title: const Text('0. 임장전 체크리스트'),
                   initiallyExpanded: !expanded,
-                  children: <Widget>[
-                    const CustomListTile(),
-                    const CustomListTile(),
-                    const CustomListTile(),
-                    const CustomListTile(),
-                    const CustomListTile(),
-                    const CustomListTile(),
-                    const CustomListTile(),
-                    ListTile(
-                      title: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          const Text('2. 주택의 규모는?'),
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                            children: [
-                              FilledButton(
-                                  style: const ButtonStyle(
-                                    backgroundColor:
-                                        MaterialStatePropertyAll<Color>(
-                                            Colors.blue),
-                                  ),
-                                  onPressed: () {},
-                                  child: const Text('좋아요')),
-                              FilledButton(
-                                  style: const ButtonStyle(
-                                    backgroundColor:
-                                        MaterialStatePropertyAll<Color>(
-                                            Colors.green),
-                                  ),
-                                  onPressed: () {},
-                                  child: const Text('보통이에요')),
-                              FilledButton(
-                                  style: const ButtonStyle(
-                                    backgroundColor:
-                                        MaterialStatePropertyAll<Color>(
-                                            Colors.red),
-                                  ),
-                                  onPressed: () {
-                                    print('나빠요');
-                                  },
-                                  child: const Text('나빠요')),
-                            ],
-                          ),
-                          const TextField(
-                            decoration: InputDecoration(
-                              border: OutlineInputBorder(),
-                              labelText: '간단한 메모',
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
+                  children: const <Widget>[
+                    CustomListTile(question: '1. 해당 매물의 세대 규모는?'),
+                    CustomListTile(question: '2. 주요 도심지 까지의 접근성은?'),
+                    CustomListTile(question: '3. 직장, 학교, 병원 등의 접근성은?'),
+                    CustomListTile(question: '4. 교통인프라의 접근성/편의성은?'),
+                    CustomListTile(question: '5. 학원가와 초등/중등 학교의 학군은?'),
+                    CustomListTile(question: '6. 해당지역의 발전 가능성은?'),
+                    CustomListTile(question: '7. 권역 내에서 해당 매물의 소득 수준은?'),
                   ],
                 ),
                 ExpansionTile(
                   initiallyExpanded: expanded,
                   title: const Text('1. 임장가서 체크리스트'),
                   children: const <Widget>[
-                    CustomListTile(),
+                    CustomListTile(question: '1. 집까지 가는길이 어떤가요?'),
+                    CustomListTile(question: '2. 동네의 분위기는 어떤가요?'),
+                    CustomListTile(question: '3. 동네 근처에 편의점이나 병원같은 편의시설이 가깝나요?')
                   ],
                 ),
                 GridView.builder(
@@ -306,11 +265,14 @@ class _ChecklistWriteState extends State<ChecklistWrite> {
         ],
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          // Add your button action here
+        onPressed: () async {
+          final picker = ImagePicker();
+          final XFile? image =
+              await picker.pickImage(source: ImageSource.gallery);
+          print('image : $image');
         },
         backgroundColor: Colors.teal,
-        child: const Icon(Icons.camera_alt_outlined),
+        child: const Icon(Icons.photo_library_rounded),
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
     );
