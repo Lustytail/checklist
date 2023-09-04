@@ -20,6 +20,18 @@ class _ChecklistWriteState extends State<ChecklistWrite> {
   String kakaoLatitude = '-';
   String kakaoLongitude = '-';
   bool expanded = false;
+  List<String> houseData = [];
+  List<dynamic> questionData = [];
+  TextEditingController priceFieldController = TextEditingController();
+  TextEditingController sizeFieldController = TextEditingController();
+
+  void saveData() {
+    setState(() {
+      // houseData.add(textFieldData);
+      // textFieldData = '';
+      // textFieldController.clear();
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -52,7 +64,7 @@ class _ChecklistWriteState extends State<ChecklistWrite> {
                 width: 20,
               ),
               Text(
-                '은마아파트(앞에서 전달)',
+                '은마아파트(앞에서 전달)', // 앞에서 넘어온 값을 가지고 저장
                 style: TextStyle(
                   fontWeight: FontWeight.w600,
                   fontSize: 32,
@@ -117,7 +129,7 @@ class _ChecklistWriteState extends State<ChecklistWrite> {
                         SizedBox(
                           width: 80,
                           child: TextField(
-                            focusNode: FocusNode(),
+                            controller: priceFieldController,
                             textDirection: TextDirection.ltr,
                             decoration: const InputDecoration(
                               hintText: '매매금액 입력',
@@ -127,21 +139,22 @@ class _ChecklistWriteState extends State<ChecklistWrite> {
                         ),
                       ],
                     ),
-                    const Row(
+                    Row(
                       crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
-                        SizedBox(
+                        const SizedBox(
                           width: 20,
                         ),
-                        Text('평형'),
-                        SizedBox(
+                        const Text('평형'),
+                        const SizedBox(
                           width: 20,
                         ),
                         SizedBox(
                           width: 80,
                           child: TextField(
+                            controller: sizeFieldController,
                             textDirection: TextDirection.ltr,
-                            decoration: InputDecoration(
+                            decoration: const InputDecoration(
                               hintText: '평형 입력',
                               border: InputBorder.none,
                             ),
@@ -236,8 +249,8 @@ class _ChecklistWriteState extends State<ChecklistWrite> {
                   children: List.generate(
                     firstQuestion.length,
                     (index) => CustomListTile(
-                        question:
-                            '${firstQuestion[index].id + 1}. ${firstQuestion[index].name}'),
+                        index: firstQuestion[index].id + 1,
+                        question: firstQuestion[index].name),
                   ),
                 ),
                 ExpansionTile(
@@ -246,10 +259,12 @@ class _ChecklistWriteState extends State<ChecklistWrite> {
                   children: List.generate(
                     secondQuestion.length,
                     (index) => CustomListTile(
-                        question:
-                            '${secondQuestion[index].id + 1}. ${secondQuestion[index].name}'),
+                        index: firstQuestion[index].id + 1,
+                        question: firstQuestion[index].name),
                   ),
                 ),
+
+                // 찍은 사진들을 보여주는 widget
                 GridView.builder(
                   itemCount: 6,
                   gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
@@ -269,6 +284,13 @@ class _ChecklistWriteState extends State<ChecklistWrite> {
                       ),
                     );
                   },
+                ),
+                ElevatedButton(
+                  onPressed: () {
+                    // Call the function to save the selected value
+                    print('save');
+                  },
+                  child: const Text('Save'),
                 ),
               ],
             ),
