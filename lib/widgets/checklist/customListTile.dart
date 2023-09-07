@@ -3,10 +3,12 @@ import 'package:flutter/material.dart';
 class CustomListTile extends StatefulWidget {
   final String question;
   final int index;
+  final Map? returnData;
   const CustomListTile({
     super.key,
     required this.question,
     required this.index,
+    this.returnData,
   });
 
   @override
@@ -14,13 +16,15 @@ class CustomListTile extends StatefulWidget {
 }
 
 class _CustomListTileState extends State<CustomListTile> {
-  late int questionId;
-  String answer = '';
+  TextEditingController descriptionController = TextEditingController();
+
 // Function to save the selected value
-  void saveSelectedValue(int index, String value) {
+  void saveSelectedValue(String value) {
     setState(() {
-      questionId = index;
-      answer = value;
+      widget.returnData!['${widget.index}'] = [
+        value,
+        descriptionController.text
+      ];
     });
   }
 
@@ -43,9 +47,7 @@ class _CustomListTileState extends State<CustomListTile> {
                         MaterialStatePropertyAll<Color>(Colors.blue),
                   ),
                   onPressed: () {
-                    saveSelectedValue(widget.index, '3');
-                    print(questionId);
-                    print(answer);
+                    saveSelectedValue('3');
                   },
                   child: const Text('좋아요')),
               FilledButton(
@@ -54,9 +56,7 @@ class _CustomListTileState extends State<CustomListTile> {
                         MaterialStatePropertyAll<Color>(Colors.green),
                   ),
                   onPressed: () {
-                    saveSelectedValue(widget.index, '2');
-                    print(questionId);
-                    print(answer);
+                    saveSelectedValue('2');
                   },
                   child: const Text('보통이에요')),
               FilledButton(
@@ -65,9 +65,7 @@ class _CustomListTileState extends State<CustomListTile> {
                         MaterialStatePropertyAll<Color>(Colors.red),
                   ),
                   onPressed: () {
-                    saveSelectedValue(widget.index, '1');
-                    print(questionId);
-                    print(answer);
+                    saveSelectedValue('1');
                   },
                   child: const Text('나빠요')),
             ],
@@ -75,8 +73,12 @@ class _CustomListTileState extends State<CustomListTile> {
           const SizedBox(
             height: 10,
           ),
-          const TextField(
-            decoration: InputDecoration(
+          TextField(
+            controller: descriptionController,
+            onChanged: (value) {
+              saveSelectedValue('3');
+            },
+            decoration: const InputDecoration(
               border: OutlineInputBorder(),
               labelText: '간단한 메모',
             ),

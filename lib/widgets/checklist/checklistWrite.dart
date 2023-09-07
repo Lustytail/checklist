@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:hive/hive.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:wyeta/hive/checkList.dart';
+import 'package:wyeta/hive/house.dart';
 import 'package:wyeta/hive/question.dart';
 import 'package:wyeta/widgets/checklist/customListTile.dart';
 
@@ -21,9 +23,11 @@ class _ChecklistWriteState extends State<ChecklistWrite> {
   String kakaoLongitude = '-';
   bool expanded = false;
   List<String> houseData = [];
-  List<dynamic> questionData = [];
+  Map firstchecklist = {};
+  Map secondchecklist = {};
   TextEditingController priceFieldController = TextEditingController();
   TextEditingController sizeFieldController = TextEditingController();
+  TextEditingController structureFieldController = TextEditingController();
 
   void saveData() {
     setState(() {
@@ -34,17 +38,28 @@ class _ChecklistWriteState extends State<ChecklistWrite> {
   }
 
   @override
+  void dispose() {
+    priceFieldController.dispose();
+    sizeFieldController.dispose();
+    structureFieldController.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     // Calculate the number of columns based on screen width
     final screenWidth = MediaQuery.of(context).size.width;
     final columnCount =
         (screenWidth / 150).floor(); // Adjust the item width (150) as needed
     final questionData = Hive.box<Question>('question');
+    final checklistData = Hive.box<CheckList>('checklist');
+    final houseData = Hive.box<House>('house');
 
     final firstQuestion =
         questionData.values.where((element) => element.type == 0).toList();
     final secondQuestion =
         questionData.values.where((element) => element.type == 1).toList();
+    String houseName = '은마아파트 301동 1503호';
     return Scaffold(
       appBar: AppBar(
         title: const Text('임장 체크리스트 작성'),
@@ -58,14 +73,14 @@ class _ChecklistWriteState extends State<ChecklistWrite> {
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Row(
+          Row(
             children: [
-              SizedBox(
+              const SizedBox(
                 width: 20,
               ),
               Text(
-                '은마아파트(앞에서 전달)', // 앞에서 넘어온 값을 가지고 저장
-                style: TextStyle(
+                houseName, // 앞에서 넘어온 값을 가지고 저장
+                style: const TextStyle(
                   fontWeight: FontWeight.w600,
                   fontSize: 32,
                 ),
@@ -162,21 +177,22 @@ class _ChecklistWriteState extends State<ChecklistWrite> {
                         ),
                       ],
                     ),
-                    const Row(
+                    Row(
                       crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
-                        SizedBox(
+                        const SizedBox(
                           width: 20,
                         ),
-                        Text('방/화장실 갯수'),
-                        SizedBox(
+                        const Text('방/화장실 갯수'),
+                        const SizedBox(
                           width: 20,
                         ),
                         SizedBox(
                           width: 80,
                           child: TextField(
+                            controller: structureFieldController,
                             textDirection: TextDirection.ltr,
-                            decoration: InputDecoration(
+                            decoration: const InputDecoration(
                               hintText: '방3 ',
                               border: InputBorder.none,
                             ),
@@ -249,8 +265,10 @@ class _ChecklistWriteState extends State<ChecklistWrite> {
                   children: List.generate(
                     firstQuestion.length,
                     (index) => CustomListTile(
-                        index: firstQuestion[index].id + 1,
-                        question: firstQuestion[index].name),
+                      index: firstQuestion[index].id + 1,
+                      question: firstQuestion[index].name,
+                      returnData: firstchecklist,
+                    ),
                   ),
                 ),
                 ExpansionTile(
@@ -259,36 +277,78 @@ class _ChecklistWriteState extends State<ChecklistWrite> {
                   children: List.generate(
                     secondQuestion.length,
                     (index) => CustomListTile(
-                        index: firstQuestion[index].id + 1,
-                        question: firstQuestion[index].name),
+                      index: firstQuestion[index].id + 1,
+                      question: firstQuestion[index].name,
+                      returnData: secondchecklist,
+                    ),
                   ),
                 ),
 
                 // 찍은 사진들을 보여주는 widget
-                GridView.builder(
-                  itemCount: 6,
-                  gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                    crossAxisCount: columnCount,
-                    crossAxisSpacing: 10,
-                    mainAxisSpacing: 10,
-                  ),
-                  shrinkWrap: true,
-                  itemBuilder: (context, index) {
-                    return Container(
-                      color: Colors.teal,
-                      child: Center(
-                        child: Text(
-                          'Item $index',
-                          style: const TextStyle(color: Colors.white),
-                        ),
-                      ),
-                    );
-                  },
-                ),
+                // GridView.builder(
+                //   itemCount: 6,
+                //   gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                //     crossAxisCount: columnCount,
+                //     crossAxisSpacing: 10,
+                //     mainAxisSpacing: 10,
+                //   ),
+                //   shrinkWrap: true,
+                //   itemBuilder: (context, index) {
+                //     return Container(
+                //       color: Colors.teal,
+                //       child: Center(
+                //         child: Text(
+                //           'Item $index',
+                //           style: const TextStyle(color: Colors.white),
+                //         ),
+                //       ),
+                //     );
+                //   },
+                // ),
                 ElevatedButton(
                   onPressed: () {
+                    houseData.put(
+                        houseName,
+                        House(
+                            name: houseName,
+                            address: '서울시 강남구',
+                            price: priceFieldController.text,
+                            size: sizeFieldController.text,
+                            structure: structureFieldController.text,
+                            description: '매매가능'));
+                    // question과 house는 houseName이 key임
+                    for (var key in firstchecklist.keys) {
+                      checklistData.put(
+                          houseName,
+                          CheckList(
+                              address: houseName,
+                              type: 0,
+                              questionId: int.parse(key),
+                              answer: firstchecklist[key][0],
+                              description: firstchecklist[key][1]));
+                    }
+                    for (var key in secondchecklist.keys) {
+                      checklistData.put(
+                          houseName,
+                          CheckList(
+                              address: houseName,
+                              type: 1,
+                              questionId: int.parse(key),
+                              answer: secondchecklist[key][0],
+                              description: secondchecklist[key][1]));
+                    }
+
                     // Call the function to save the selected value
                     print('save');
+                    print('firstchecklist : $firstchecklist');
+                    print('secondchecklist : $secondchecklist');
+                    print('hive data!!!');
+                    for (var box in checklistData.keys) {
+                      print('data : $box - ${checklistData.get(box)}');
+                    }
+                    for (var box in houseData.keys) {
+                      print('data : $box - ${houseData.get(box)}');
+                    }
                   },
                   child: const Text('Save'),
                 ),

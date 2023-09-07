@@ -18,23 +18,26 @@ class CheckListAdapter extends TypeAdapter<CheckList> {
     };
     return CheckList(
       address: fields[0] as String,
-      questionId: fields[1] as int,
-      answer: fields[2] as String?,
-      description: fields[3] as String?,
+      type: fields[1] as int,
+      questionId: fields[2] as int,
+      answer: fields[3] as String,
+      description: fields[4] as String?,
     );
   }
 
   @override
   void write(BinaryWriter writer, CheckList obj) {
     writer
-      ..writeByte(4)
+      ..writeByte(5)
       ..writeByte(0)
       ..write(obj.address)
       ..writeByte(1)
-      ..write(obj.questionId)
+      ..write(obj.type)
       ..writeByte(2)
-      ..write(obj.answer)
+      ..write(obj.questionId)
       ..writeByte(3)
+      ..write(obj.answer)
+      ..writeByte(4)
       ..write(obj.description);
   }
 
