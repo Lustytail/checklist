@@ -94,43 +94,45 @@ class _ChecklistWriteState extends State<ChecklistWrite> {
                 flex: 2,
                 child: Column(
                   children: [
-                    /* TODO 국가 주소 검색 연동
-                        Container(
-                          alignment: Alignment.center,
-                          child: Container(
-                child: TextButton(
-                  onPressed: () async {
-                    await Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (_) => KpostalView(
-                          useLocalServer: true,
-                          localPort: 1024,
-                          // kakaoKey: '{Add your KAKAO DEVELOPERS JS KEY}',
-                          callback: (Kpostal result) {
-                            setState(() {
-                              postCode = result.postCode;
-                              address = result.address;
-                              latitude = result.latitude.toString();
-                              longitude = result.longitude.toString();
-                              kakaoLatitude = result.kakaoLatitude.toString();
-                              kakaoLongitude = result.kakaoLongitude.toString();
-                            });
-                          },
-                        ),
-                      ),
-                    );
-                  },
-                  style: ButtonStyle(
-                      backgroundColor:
-                          MaterialStateProperty.all<Color>(Colors.blue)),
-                  child: const Text(
-                    'Search Address',
-                    style: TextStyle(color: Colors.white),
-                  ),
-                ),
-                          ),
-                        ),*/
+                    // TODO 국가 주소 검색 연동
+                    // Container(
+                    //   alignment: Alignment.center,
+                    //   child: Container(
+                    //     child: TextButton(
+                    //       onPressed: () async {
+                    //         await Navigator.push(
+                    //           context,
+                    //           MaterialPageRoute(
+                    //             builder: (_) => KpostalView(
+                    //               useLocalServer: false,
+                    //               localPort: 1024,
+                    //               kakaoKey: '3e4c0ecd981635225530d53ce9849ed9',
+                    //               callback: (Kpostal result) {
+                    //                 setState(() {
+                    //                   postCode = result.postCode;
+                    //                   address = result.address;
+                    //                   latitude = result.latitude.toString();
+                    //                   longitude = result.longitude.toString();
+                    //                   kakaoLatitude =
+                    //                       result.kakaoLatitude.toString();
+                    //                   kakaoLongitude =
+                    //                       result.kakaoLongitude.toString();
+                    //                 });
+                    //               },
+                    //             ),
+                    //           ),
+                    //         );
+                    //       },
+                    //       style: ButtonStyle(
+                    //           backgroundColor: MaterialStateProperty.all<Color>(
+                    //               Colors.blue)),
+                    //       child: const Text(
+                    //         'Search Address',
+                    //         style: TextStyle(color: Colors.white),
+                    //       ),
+                    //     ),
+                    //   ),
+                    // ),
                     Row(
                       crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
@@ -338,7 +340,7 @@ class _ChecklistWriteState extends State<ChecklistWrite> {
                               description: secondchecklist[key][1]));
                     }
 
-                    // Call the function to save the selected value
+                    // 데이터 확인을 위한 print
                     print('save');
                     print('firstchecklist : $firstchecklist');
                     print('secondchecklist : $secondchecklist');
@@ -349,6 +351,31 @@ class _ChecklistWriteState extends State<ChecklistWrite> {
                     for (var box in houseData.keys) {
                       print('data : $box - ${houseData.get(box)}');
                     }
+
+                    showDialog(
+                      context: context,
+                      builder: (BuildContext context) {
+                        return AlertDialog(
+                          content: const Text('저장하시겠습니까?'),
+                          actions: <Widget>[
+                            TextButton(
+                              child: const Text('Yes'),
+                              onPressed: () {
+                                Navigator.of(context).pop(); // Close the dialog
+                                Navigator.of(context)
+                                    .pop(); // Go back to the previous screen
+                              },
+                            ),
+                            TextButton(
+                              child: const Text('취소'),
+                              onPressed: () {
+                                Navigator.of(context).pop(); // Close the dialog
+                              },
+                            ),
+                          ],
+                        );
+                      },
+                    );
                   },
                   child: const Text('Save'),
                 ),
