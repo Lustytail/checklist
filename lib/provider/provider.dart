@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:hive_flutter/hive_flutter.dart';
 
 // 전역 변수 설정하는 곳
 // 사용방법 : context.read<GlobalValue>().str

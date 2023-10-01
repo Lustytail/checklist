@@ -307,6 +307,8 @@ class _ChecklistWriteState extends State<ChecklistWrite> {
                 //     );
                 //   },
                 // ),
+
+                // Save 버튼
                 ElevatedButton(
                   onPressed: () {
                     houseData.put(
@@ -319,25 +321,23 @@ class _ChecklistWriteState extends State<ChecklistWrite> {
                             structure: structureFieldController.text,
                             description: '매매가능'));
                     // question과 house는 houseName이 key임
+                    var firstChkList = <CheckList>[];
                     for (var key in firstchecklist.keys) {
-                      checklistData.put(
-                          houseName,
-                          CheckList(
-                              address: houseName,
-                              type: 0,
-                              questionId: int.parse(key),
-                              answer: firstchecklist[key][0],
-                              description: firstchecklist[key][1]));
+                      firstChkList.add(CheckList(
+                          address: houseName,
+                          type: 0,
+                          questionId: int.parse(key),
+                          answer: firstchecklist[key][0],
+                          description: firstchecklist[key][1]));
                     }
+                    var secondChkList = <CheckList>[];
                     for (var key in secondchecklist.keys) {
-                      checklistData.put(
-                          houseName,
-                          CheckList(
-                              address: houseName,
-                              type: 1,
-                              questionId: int.parse(key),
-                              answer: secondchecklist[key][0],
-                              description: secondchecklist[key][1]));
+                      secondChkList.add(CheckList(
+                          address: houseName,
+                          type: 1,
+                          questionId: int.parse(key),
+                          answer: secondchecklist[key][0],
+                          description: secondchecklist[key][1]));
                     }
 
                     // 데이터 확인을 위한 print
@@ -345,11 +345,15 @@ class _ChecklistWriteState extends State<ChecklistWrite> {
                     print('firstchecklist : $firstchecklist');
                     print('secondchecklist : $secondchecklist');
                     print('hive data!!!');
-                    for (var box in checklistData.keys) {
-                      print('data : $box - ${checklistData.get(box)}');
-                    }
-                    for (var box in houseData.keys) {
-                      print('data : $box - ${houseData.get(box)}');
+                    final chkList = checklistData.values.toList();
+                    // CheckList 객체 출력
+                    for (var checklist in chkList) {
+                      print('Address: ${checklist.address}');
+                      print('Type: ${checklist.type}');
+                      print('Question ID: ${checklist.questionId}');
+                      print('Answer: ${checklist.answer}');
+                      print('Description: ${checklist.description}');
+                      print('---');
                     }
 
                     showDialog(
@@ -361,6 +365,26 @@ class _ChecklistWriteState extends State<ChecklistWrite> {
                             TextButton(
                               child: const Text('Yes'),
                               onPressed: () {
+                                // hive에 데이터 저장
+                                for (var saveTobox in firstChkList) {
+                                  checklistData.add(saveTobox);
+                                }
+                                for (var saveTobox in secondChkList) {
+                                  checklistData.add(saveTobox);
+                                }
+
+                                final chkList = checklistData.values.toList();
+                                print('save btn click');
+                                // CheckList 객체 출력
+                                for (var checklist in chkList) {
+                                  print('Address: ${checklist.address}');
+                                  print('Type: ${checklist.type}');
+                                  print('Question ID: ${checklist.questionId}');
+                                  print('Answer: ${checklist.answer}');
+                                  print(
+                                      'Description: ${checklist.description}');
+                                  print('---');
+                                }
                                 Navigator.of(context).pop(); // Close the dialog
                                 Navigator.of(context)
                                     .pop(); // Go back to the previous screen
