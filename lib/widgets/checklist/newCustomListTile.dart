@@ -1,38 +1,37 @@
 import 'package:flutter/material.dart';
 import 'package:wyeta/widgets/common/filedButton.dart';
 
-class CustomListTile extends StatefulWidget {
+class NewCustomListTile extends StatefulWidget {
   final String question;
   final int index;
   final Map? returnData;
-  const CustomListTile({
+  final VoidCallback onPressed;
+
+  const NewCustomListTile({
     super.key,
     required this.question,
     required this.index,
     this.returnData,
+    required this.onPressed,
   });
 
   @override
-  State<CustomListTile> createState() => _CustomListTileState();
+  State<NewCustomListTile> createState() => _NewCustomListTileState();
 }
 
-class _CustomListTileState extends State<CustomListTile> {
+class _NewCustomListTileState extends State<NewCustomListTile> {
   TextEditingController descriptionController = TextEditingController();
   int selectedButtonIndex = -1; // 선택된 버튼의 인덱스를 저장하는 변수
 
 // Function to save the selected value
-  void saveSelectedValue(String value) {
+  void saveSelectedValue({required String value, required int index}) {
     setState(() {
       widget.returnData!['${widget.index}'] = [
         value,
         descriptionController.text
       ];
-    });
-  }
-
-  void _onButtonPressed(int index) {
-    setState(() {
       selectedButtonIndex = index; // 선택된 버튼의 인덱스 업데이트
+      widget.onPressed();
     });
   }
 
@@ -51,8 +50,7 @@ class _CustomListTileState extends State<CustomListTile> {
             children: [
               FilledButtons(
                 onPressed: () {
-                  _onButtonPressed(0);
-                  saveSelectedValue('3');
+                  saveSelectedValue(value: '3', index: 0);
                 },
                 backgroundColor: Colors.blue,
                 isSelected: selectedButtonIndex == 0,
@@ -60,8 +58,7 @@ class _CustomListTileState extends State<CustomListTile> {
               ),
               FilledButtons(
                 onPressed: () {
-                  _onButtonPressed(1);
-                  saveSelectedValue('2');
+                  saveSelectedValue(value: '2', index: 1);
                 },
                 backgroundColor: Colors.green,
                 isSelected: selectedButtonIndex == 1,
@@ -69,8 +66,7 @@ class _CustomListTileState extends State<CustomListTile> {
               ),
               FilledButtons(
                 onPressed: () {
-                  _onButtonPressed(2);
-                  saveSelectedValue('1');
+                  saveSelectedValue(value: '1', index: 2);
                 },
                 backgroundColor: Colors.red,
                 isSelected: selectedButtonIndex == 2,
@@ -84,7 +80,9 @@ class _CustomListTileState extends State<CustomListTile> {
           TextField(
             controller: descriptionController,
             onChanged: (value) {
-              saveSelectedValue('');
+              setState(
+                () {},
+              );
             },
             decoration: const InputDecoration(
               border: OutlineInputBorder(),

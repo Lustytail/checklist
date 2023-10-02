@@ -4,17 +4,17 @@ import 'package:image_picker/image_picker.dart';
 import 'package:wyeta/hive/checkList.dart';
 import 'package:wyeta/hive/house.dart';
 import 'package:wyeta/hive/question.dart';
-import 'package:wyeta/widgets/checklist/newCustomListTile.dart';
+import 'package:wyeta/widgets/checklist/LoadCustomListTile.dart';
 
-class ChecklistWrite extends StatefulWidget {
+class ChecklistLoad extends StatefulWidget {
   final DateTime? date;
-  const ChecklistWrite({super.key, this.date});
+  const ChecklistLoad({super.key, this.date});
 
   @override
-  State<ChecklistWrite> createState() => _ChecklistWriteState();
+  State<ChecklistLoad> createState() => _ChecklistLoadState();
 }
 
-class _ChecklistWriteState extends State<ChecklistWrite> {
+class _ChecklistLoadState extends State<ChecklistLoad> {
   String postCode = '-';
   String address = '-';
   String latitude = '-';
@@ -25,11 +25,17 @@ class _ChecklistWriteState extends State<ChecklistWrite> {
   List<String> houseData = [];
   Map firstchecklist = {};
   Map secondchecklist = {};
-  // 0번째 값이 1, 2, 3일 때 각 값이 몇 번 나왔는지 저장할 Map
-  Map<int, int> countMap = {1: 0, 2: 0, 3: 0};
   TextEditingController priceFieldController = TextEditingController();
   TextEditingController sizeFieldController = TextEditingController();
   TextEditingController structureFieldController = TextEditingController();
+
+  void saveData() {
+    setState(() {
+      // houseData.add(textFieldData);
+      // textFieldData = '';
+      // textFieldController.clear();
+    });
+  }
 
   @override
   void dispose() {
@@ -37,31 +43,6 @@ class _ChecklistWriteState extends State<ChecklistWrite> {
     sizeFieldController.dispose();
     structureFieldController.dispose();
     super.dispose();
-  }
-
-  void handleGrade() {
-    setState(() {
-      countMap = {1: 0, 2: 0, 3: 0};
-      for (var value in firstchecklist.values) {
-        // value의 첫 번째 항목(0번째)을 가져와서 countMap에 증가시킵니다.
-        if (value.isNotEmpty) {
-          int firstValue = int.parse(value[0]);
-          countMap[firstValue] = (countMap[firstValue] ?? 0) + 1;
-        }
-      }
-
-      for (var value in secondchecklist.values) {
-        // value의 첫 번째 항목(0번째)을 가져와서 countMap에 증가시킵니다.
-        if (value.isNotEmpty) {
-          int firstValue = int.parse(value[0]);
-          countMap[firstValue] = (countMap[firstValue] ?? 0) + 1;
-        }
-      }
-      // 결과 출력
-      print("Count of 1: ${countMap[1]}");
-      print("Count of 2: ${countMap[2]}");
-      print("Count of 3: ${countMap[3]}");
-    });
   }
 
   @override
@@ -248,32 +229,32 @@ class _ChecklistWriteState extends State<ChecklistWrite> {
               ),
             ],
           ),
-          Row(
+          const Row(
             children: [
-              const SizedBox(
+              SizedBox(
                 width: 20,
               ),
-              const Icon(
+              Icon(
                 Icons.sentiment_satisfied_alt_outlined,
                 color: Colors.blue,
               ),
-              Text(countMap[3].toString()),
-              const SizedBox(
+              Text("11"),
+              SizedBox(
                 width: 20,
               ),
-              const Icon(
+              Icon(
                 Icons.sentiment_neutral_outlined,
                 color: Colors.green,
               ),
-              Text(countMap[2].toString()),
-              const SizedBox(
+              Text("12"),
+              SizedBox(
                 width: 20,
               ),
-              const Icon(
+              Icon(
                 Icons.sentiment_dissatisfied_outlined,
                 color: Colors.red,
               ),
-              Text(countMap[1].toString()),
+              Text("1"),
             ],
           ),
           Expanded(
@@ -286,13 +267,10 @@ class _ChecklistWriteState extends State<ChecklistWrite> {
                   initiallyExpanded: !expanded,
                   children: List.generate(
                     firstQuestion.length,
-                    (index) => NewCustomListTile(
+                    (index) => LoadCustomListTile(
                       index: firstQuestion[index].id + 1,
                       question: firstQuestion[index].name,
                       returnData: firstchecklist,
-                      onPressed: () {
-                        handleGrade();
-                      },
                     ),
                   ),
                 ),
@@ -301,15 +279,10 @@ class _ChecklistWriteState extends State<ChecklistWrite> {
                   title: const Text('1. 임장가서 체크리스트'),
                   children: List.generate(
                     secondQuestion.length,
-                    (index) => NewCustomListTile(
+                    (index) => LoadCustomListTile(
                       index: firstQuestion[index].id + 1,
                       question: firstQuestion[index].name,
                       returnData: secondchecklist,
-                      onPressed: () {
-                        setState(() {
-                          handleGrade();
-                        });
-                      },
                     ),
                   ),
                 ),
