@@ -35,8 +35,8 @@ class _ChecklistLoadState extends State<ChecklistLoad> {
 
   @override
   void initState() {
-    // TODO: implement initState
     super.initState();
+    // hive 에서 데이터 가져오기
     priceFieldController.text = houseData.values
             .where((element) => element.name == '은마아파트 301동 1503호')
             .first
@@ -52,6 +52,22 @@ class _ChecklistLoadState extends State<ChecklistLoad> {
             .first
             .structure ??
         "";
+    final checkList = checklistData.values
+        .where((element) => element.address == '은마아파트 301동 1503호')
+        .toList();
+
+    final firstChecklistData =
+        checkList.where((checkList) => checkList.type == 0).toList();
+    final secondChecklistData =
+        checkList.where((checkList) => checkList.type == 1).toList();
+    for (var a in firstChecklistData) {
+      firstchecklist[a.questionId.toString()] = [a.answer, a.description];
+    }
+
+    for (var a in secondChecklistData) {
+      secondchecklist[a.questionId.toString()] = [a.answer, a.description];
+    }
+    handleGrade();
   }
 
   @override
@@ -97,24 +113,7 @@ class _ChecklistLoadState extends State<ChecklistLoad> {
         questionData.values.where((element) => element.type == 0).toList();
     final secondQuestion =
         questionData.values.where((element) => element.type == 1).toList();
-    final checkList = checklistData.values
-        .where((element) => element.address == houseName)
-        .toList();
 
-    final firstChecklistData =
-        checkList.where((checkList) => checkList.type == 0).toList();
-    final secondChecklistData =
-        checkList.where((checkList) => checkList.type == 1).toList();
-    for (var a in firstChecklistData) {
-      firstchecklist[a.questionId.toString()] = [a.answer, a.description];
-    }
-
-    for (var a in secondChecklistData) {
-      secondchecklist[a.questionId.toString()] = [a.answer, a.description];
-    }
-
-    // 데이터 받아와서 한번 setState함수 호출해주는 부분
-    handleGrade();
     return Scaffold(
       appBar: AppBar(
         title: const Text('임장 체크리스트 작성'),
