@@ -22,19 +22,36 @@ class _ChecklistLoadState extends State<ChecklistLoad> {
   String kakaoLatitude = '-';
   String kakaoLongitude = '-';
   bool expanded = false;
-  List<String> houseData = [];
   Map firstchecklist = {};
   Map secondchecklist = {};
+  // 0번째 값이 1, 2, 3일 때 각 값이 몇 번 나왔는지 저장할 Map
+  Map<int, int> countMap = {1: 0, 2: 0, 3: 0};
   TextEditingController priceFieldController = TextEditingController();
   TextEditingController sizeFieldController = TextEditingController();
   TextEditingController structureFieldController = TextEditingController();
+  final questionData = Hive.box<Question>('question');
+  final checklistData = Hive.box<CheckList>('checklist');
+  final houseData = Hive.box<House>('house');
 
-  void saveData() {
-    setState(() {
-      // houseData.add(textFieldData);
-      // textFieldData = '';
-      // textFieldController.clear();
-    });
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    priceFieldController.text = houseData.values
+            .where((element) => element.name == '은마아파트 301동 1503호')
+            .first
+            .price ??
+        "";
+    sizeFieldController.text = houseData.values
+            .where((element) => element.name == '은마아파트 301동 1503호')
+            .first
+            .size ??
+        "";
+    structureFieldController.text = houseData.values
+            .where((element) => element.name == '은마아파트 301동 1503호')
+            .first
+            .structure ??
+        "";
   }
 
   @override
@@ -45,21 +62,59 @@ class _ChecklistLoadState extends State<ChecklistLoad> {
     super.dispose();
   }
 
+  // 평점이 1, 2, 3일 때 각 값이 몇 번 나왔는지 저장하는 함수
+  void handleGrade() {
+    setState(() {
+      countMap = {1: 0, 2: 0, 3: 0};
+      for (var value in firstchecklist.values) {
+        // value의 첫 번째 항목(0번째)을 가져와서 countMap에 증가시킵니다.
+        if (value.isNotEmpty) {
+          int firstValue = int.parse(value[0]);
+          countMap[firstValue] = (countMap[firstValue] ?? 0) + 1;
+        }
+      }
+
+      for (var value in secondchecklist.values) {
+        // value의 첫 번째 항목(0번째)을 가져와서 countMap에 증가시킵니다.
+        if (value.isNotEmpty) {
+          int firstValue = int.parse(value[0]);
+          countMap[firstValue] = (countMap[firstValue] ?? 0) + 1;
+        }
+      }
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     // Calculate the number of columns based on screen width
     final screenWidth = MediaQuery.of(context).size.width;
     final columnCount =
         (screenWidth / 150).floor(); // Adjust the item width (150) as needed
-    final questionData = Hive.box<Question>('question');
-    final checklistData = Hive.box<CheckList>('checklist');
-    final houseData = Hive.box<House>('house');
 
+    String houseName = '은마아파트 301동 1503호';
+    // hive 에서 데이터 가져오기
     final firstQuestion =
         questionData.values.where((element) => element.type == 0).toList();
     final secondQuestion =
         questionData.values.where((element) => element.type == 1).toList();
-    String houseName = '은마아파트 301동 1503호';
+    final checkList = checklistData.values
+        .where((element) => element.address == houseName)
+        .toList();
+
+    final firstChecklistData =
+        checkList.where((checkList) => checkList.type == 0).toList();
+    final secondChecklistData =
+        checkList.where((checkList) => checkList.type == 1).toList();
+    for (var a in firstChecklistData) {
+      firstchecklist[a.questionId.toString()] = [a.answer, a.description];
+    }
+
+    for (var a in secondChecklistData) {
+      secondchecklist[a.questionId.toString()] = [a.answer, a.description];
+    }
+
+    // 데이터 받아와서 한번 setState함수 호출해주는 부분
+    handleGrade();
     return Scaffold(
       appBar: AppBar(
         title: const Text('임장 체크리스트 작성'),
@@ -229,32 +284,32 @@ class _ChecklistLoadState extends State<ChecklistLoad> {
               ),
             ],
           ),
-          const Row(
+          Row(
             children: [
-              SizedBox(
+              const SizedBox(
                 width: 20,
               ),
-              Icon(
+              const Icon(
                 Icons.sentiment_satisfied_alt_outlined,
                 color: Colors.blue,
               ),
-              Text("11"),
-              SizedBox(
+              Text(countMap[3].toString()),
+              const SizedBox(
                 width: 20,
               ),
-              Icon(
+              const Icon(
                 Icons.sentiment_neutral_outlined,
                 color: Colors.green,
               ),
-              Text("12"),
-              SizedBox(
+              Text(countMap[2].toString()),
+              const SizedBox(
                 width: 20,
               ),
-              Icon(
+              const Icon(
                 Icons.sentiment_dissatisfied_outlined,
                 color: Colors.red,
               ),
-              Text("1"),
+              Text(countMap[1].toString()),
             ],
           ),
           Expanded(
@@ -271,6 +326,9 @@ class _ChecklistLoadState extends State<ChecklistLoad> {
                       index: firstQuestion[index].id + 1,
                       question: firstQuestion[index].name,
                       returnData: firstchecklist,
+                      onPressed: () {
+                        handleGrade();
+                      },
                     ),
                   ),
                 ),
@@ -280,13 +338,17 @@ class _ChecklistLoadState extends State<ChecklistLoad> {
                   children: List.generate(
                     secondQuestion.length,
                     (index) => LoadCustomListTile(
-                      index: firstQuestion[index].id + 1,
-                      question: firstQuestion[index].name,
+                      index: secondQuestion[index].id + 1,
+                      question: secondQuestion[index].name,
                       returnData: secondchecklist,
+                      onPressed: () {
+                        setState(() {
+                          handleGrade();
+                        });
+                      },
                     ),
                   ),
                 ),
-
                 // 찍은 사진들을 보여주는 widget
                 // GridView.builder(
                 //   itemCount: 6,

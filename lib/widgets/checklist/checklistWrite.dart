@@ -57,10 +57,6 @@ class _ChecklistWriteState extends State<ChecklistWrite> {
           countMap[firstValue] = (countMap[firstValue] ?? 0) + 1;
         }
       }
-      // 결과 출력
-      print("Count of 1: ${countMap[1]}");
-      print("Count of 2: ${countMap[2]}");
-      print("Count of 3: ${countMap[3]}");
     });
   }
 
@@ -302,8 +298,8 @@ class _ChecklistWriteState extends State<ChecklistWrite> {
                   children: List.generate(
                     secondQuestion.length,
                     (index) => NewCustomListTile(
-                      index: firstQuestion[index].id + 1,
-                      question: firstQuestion[index].name,
+                      index: secondQuestion[index].id + 1,
+                      question: secondQuestion[index].name,
                       returnData: secondchecklist,
                       onPressed: () {
                         setState(() {

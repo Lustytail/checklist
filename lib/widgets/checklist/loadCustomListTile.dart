@@ -5,11 +5,14 @@ class LoadCustomListTile extends StatefulWidget {
   final String question;
   final int index;
   final Map? returnData;
+  final VoidCallback onPressed;
+
   const LoadCustomListTile({
     super.key,
     required this.question,
     required this.index,
     this.returnData,
+    required this.onPressed,
   });
 
   @override
@@ -20,15 +23,34 @@ class _LoadCustomListTileState extends State<LoadCustomListTile> {
   TextEditingController descriptionController = TextEditingController();
   int selectedButtonIndex = -1; // 선택된 버튼의 인덱스를 저장하는 변수
 
-// Function to save the selected value
+// 선택한 값을 저장
   void saveSelectedValue({required String value, required int index}) {
     setState(() {
-      widget.returnData!['${widget.index}'] = [
-        value,
-        descriptionController.text
-      ];
+      widget.returnData!['${widget.index}'] = [value, ""];
       selectedButtonIndex = index; // 선택된 버튼의 인덱스 업데이트
+      widget.onPressed();
     });
+  }
+
+// 메모저장
+  void saveDescription() {
+    setState(() {
+      widget.returnData!['${widget.index}'][1] = descriptionController.text;
+    });
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    // hive에 저장되어있는 데이터를 가지고와서 selectedButtonIndex에 저장
+    selectedButtonIndex = widget.returnData!['${widget.index}'][0] == '3'
+        ? 0
+        : widget.returnData!['${widget.index}'][0] == '2'
+            ? 1
+            : widget.returnData!['${widget.index}'][0] == '1'
+                ? 2
+                : -1;
+    descriptionController.text = widget.returnData!['${widget.index}'][1];
   }
 
   @override
@@ -76,9 +98,7 @@ class _LoadCustomListTileState extends State<LoadCustomListTile> {
           TextField(
             controller: descriptionController,
             onChanged: (value) {
-              setState(
-                () {},
-              );
+              saveDescription();
             },
             decoration: const InputDecoration(
               border: OutlineInputBorder(),
