@@ -30,6 +30,7 @@ class _ChecklistWriteState extends State<ChecklistWrite> {
   TextEditingController priceFieldController = TextEditingController();
   TextEditingController sizeFieldController = TextEditingController();
   TextEditingController structureFieldController = TextEditingController();
+  TextEditingController houseNameFieldController = TextEditingController();
 
   @override
   void dispose() {
@@ -74,7 +75,6 @@ class _ChecklistWriteState extends State<ChecklistWrite> {
         questionData.values.where((element) => element.type == 0).toList();
     final secondQuestion =
         questionData.values.where((element) => element.type == 1).toList();
-    String houseName = '은마아파트 301동 1503호';
     return Scaffold(
       appBar: AppBar(
         title: const Text('임장 체크리스트 작성'),
@@ -93,11 +93,16 @@ class _ChecklistWriteState extends State<ChecklistWrite> {
               const SizedBox(
                 width: 20,
               ),
-              Text(
-                houseName, // 앞에서 넘어온 값을 가지고 저장
-                style: const TextStyle(
-                  fontWeight: FontWeight.w600,
-                  fontSize: 32,
+              Expanded(
+                child: TextField(
+                  style: const TextStyle(
+                      fontSize: 30.0, fontWeight: FontWeight.w600),
+                  controller: houseNameFieldController,
+                  textDirection: TextDirection.ltr,
+                  decoration: const InputDecoration(
+                    hintText: '아파트 이름 입력',
+                    border: InputBorder.none,
+                  ),
                 ),
               ),
             ],
@@ -336,9 +341,9 @@ class _ChecklistWriteState extends State<ChecklistWrite> {
                 ElevatedButton(
                   onPressed: () {
                     houseData.put(
-                        houseName,
+                        houseNameFieldController.text,
                         House(
-                            name: houseName,
+                            name: houseNameFieldController.text,
                             address: '서울시 강남구',
                             price: priceFieldController.text,
                             size: sizeFieldController.text,
@@ -348,7 +353,7 @@ class _ChecklistWriteState extends State<ChecklistWrite> {
                     var firstChkList = <CheckList>[];
                     for (var key in firstchecklist.keys) {
                       firstChkList.add(CheckList(
-                          address: houseName,
+                          address: houseNameFieldController.text,
                           type: 0,
                           questionId: int.parse(key),
                           answer: firstchecklist[key][0],
@@ -357,7 +362,7 @@ class _ChecklistWriteState extends State<ChecklistWrite> {
                     var secondChkList = <CheckList>[];
                     for (var key in secondchecklist.keys) {
                       secondChkList.add(CheckList(
-                          address: houseName,
+                          address: houseNameFieldController.text,
                           type: 1,
                           questionId: int.parse(key),
                           answer: secondchecklist[key][0],

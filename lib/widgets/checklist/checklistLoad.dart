@@ -8,7 +8,8 @@ import 'package:wyeta/widgets/checklist/LoadCustomListTile.dart';
 
 class ChecklistLoad extends StatefulWidget {
   final DateTime? date;
-  const ChecklistLoad({super.key, this.date});
+  final String houseName;
+  const ChecklistLoad({super.key, this.date, required this.houseName});
 
   @override
   State<ChecklistLoad> createState() => _ChecklistLoadState();
@@ -106,8 +107,6 @@ class _ChecklistLoadState extends State<ChecklistLoad> {
     final screenWidth = MediaQuery.of(context).size.width;
     final columnCount =
         (screenWidth / 150).floor(); // Adjust the item width (150) as needed
-
-    String houseName = '은마아파트 301동 1503호';
     // hive 에서 데이터 가져오기
     final firstQuestion =
         questionData.values.where((element) => element.type == 0).toList();
@@ -133,7 +132,7 @@ class _ChecklistLoadState extends State<ChecklistLoad> {
                 width: 20,
               ),
               Text(
-                houseName, // 앞에서 넘어온 값을 가지고 저장
+                widget.houseName, // 앞에서 넘어온 값을 가지고 저장
                 style: const TextStyle(
                   fontWeight: FontWeight.w600,
                   fontSize: 32,
@@ -374,9 +373,9 @@ class _ChecklistLoadState extends State<ChecklistLoad> {
                 ElevatedButton(
                   onPressed: () {
                     houseData.put(
-                        houseName,
+                        widget.houseName,
                         House(
-                            name: houseName,
+                            name: widget.houseName,
                             address: '서울시 강남구',
                             price: priceFieldController.text,
                             size: sizeFieldController.text,
@@ -386,7 +385,7 @@ class _ChecklistLoadState extends State<ChecklistLoad> {
                     var firstChkList = <CheckList>[];
                     for (var key in firstchecklist.keys) {
                       firstChkList.add(CheckList(
-                          address: houseName,
+                          address: widget.houseName,
                           type: 0,
                           questionId: int.parse(key),
                           answer: firstchecklist[key][0],
@@ -395,7 +394,7 @@ class _ChecklistLoadState extends State<ChecklistLoad> {
                     var secondChkList = <CheckList>[];
                     for (var key in secondchecklist.keys) {
                       secondChkList.add(CheckList(
-                          address: houseName,
+                          address: widget.houseName,
                           type: 1,
                           questionId: int.parse(key),
                           answer: secondchecklist[key][0],

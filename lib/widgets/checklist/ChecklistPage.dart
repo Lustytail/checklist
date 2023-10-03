@@ -27,11 +27,13 @@ class ChecklistPage extends StatelessWidget {
           onPressed: () {
             Navigator.push(
               context,
-              MaterialPageRoute(builder: (context) => const ChecklistLoad()),
+              MaterialPageRoute(
+                  builder: (context) =>
+                      const ChecklistLoad(houseName: '트리마제 306동 3901호')),
             );
           },
           child: const Text(
-            'Go Load Checklist',
+            '트리마제 305동 3901호',
             style: TextStyle(color: Colors.white),
           ),
         ),
