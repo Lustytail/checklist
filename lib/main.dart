@@ -5,6 +5,7 @@ import 'package:flutter/services.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:provider/provider.dart';
+import 'package:wyeta/hive/checkList.dart';
 import 'package:wyeta/hive/house.dart';
 import 'package:wyeta/hive/question.dart';
 import 'package:wyeta/hive/schedule.dart';
@@ -18,10 +19,12 @@ void main() async {
   Hive.registerAdapter(HouseAdapter());
   Hive.registerAdapter(ScheduleAdapter());
   Hive.registerAdapter(QuestionAdapter());
+  Hive.registerAdapter(CheckListAdapter());
   final houseBox = await Hive.openBox<House>('house');
   final scheduleBox = await Hive.openBox<Schedule>('schedule');
   // Hive 박스 열기만 함!
   await Hive.openBox<Question>('question');
+  await Hive.openBox<CheckList>('checkList');
 
 // assets 폴더에서 JSON 파일을 읽어옴
   final String data = await rootBundle.loadString('assets/questionData.json');

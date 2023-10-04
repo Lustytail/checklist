@@ -4,17 +4,18 @@ import 'package:image_picker/image_picker.dart';
 import 'package:wyeta/hive/checkList.dart';
 import 'package:wyeta/hive/house.dart';
 import 'package:wyeta/hive/question.dart';
-import 'package:wyeta/widgets/checklist/newCustomListTile.dart';
+import 'package:wyeta/widgets/checklist/LoadCustomListTile.dart';
 
-class ChecklistWrite extends StatefulWidget {
+class ChecklistLoad extends StatefulWidget {
   final DateTime? date;
-  const ChecklistWrite({super.key, this.date});
+  final String houseName;
+  const ChecklistLoad({super.key, this.date, required this.houseName});
 
   @override
-  State<ChecklistWrite> createState() => _ChecklistWriteState();
+  State<ChecklistLoad> createState() => _ChecklistLoadState();
 }
 
-class _ChecklistWriteState extends State<ChecklistWrite> {
+class _ChecklistLoadState extends State<ChecklistLoad> {
   String postCode = '-';
   String address = '-';
   String latitude = '-';
@@ -22,7 +23,6 @@ class _ChecklistWriteState extends State<ChecklistWrite> {
   String kakaoLatitude = '-';
   String kakaoLongitude = '-';
   bool expanded = false;
-  List<String> houseData = [];
   Map firstchecklist = {};
   Map secondchecklist = {};
   // 0번째 값이 1, 2, 3일 때 각 값이 몇 번 나왔는지 저장할 Map
@@ -30,7 +30,46 @@ class _ChecklistWriteState extends State<ChecklistWrite> {
   TextEditingController priceFieldController = TextEditingController();
   TextEditingController sizeFieldController = TextEditingController();
   TextEditingController structureFieldController = TextEditingController();
-  TextEditingController houseNameFieldController = TextEditingController();
+  final questionData = Hive.box<Question>('question');
+  final checklistData = Hive.box<CheckList>('checklist');
+  final houseData = Hive.box<House>('house');
+
+  @override
+  void initState() {
+    super.initState();
+    // hive 에서 데이터 가져오기
+    priceFieldController.text = houseData.values
+            .where((element) => element.name == '은마아파트 301동 1503호')
+            .first
+            .price ??
+        "";
+    sizeFieldController.text = houseData.values
+            .where((element) => element.name == '은마아파트 301동 1503호')
+            .first
+            .size ??
+        "";
+    structureFieldController.text = houseData.values
+            .where((element) => element.name == '은마아파트 301동 1503호')
+            .first
+            .structure ??
+        "";
+    final checkList = checklistData.values
+        .where((element) => element.address == '은마아파트 301동 1503호')
+        .toList();
+
+    final firstChecklistData =
+        checkList.where((checkList) => checkList.type == 0).toList();
+    final secondChecklistData =
+        checkList.where((checkList) => checkList.type == 1).toList();
+    for (var a in firstChecklistData) {
+      firstchecklist[a.questionId.toString()] = [a.answer, a.description];
+    }
+
+    for (var a in secondChecklistData) {
+      secondchecklist[a.questionId.toString()] = [a.answer, a.description];
+    }
+    handleGrade();
+  }
 
   @override
   void dispose() {
@@ -40,6 +79,7 @@ class _ChecklistWriteState extends State<ChecklistWrite> {
     super.dispose();
   }
 
+  // 평점이 1, 2, 3일 때 각 값이 몇 번 나왔는지 저장하는 함수
   void handleGrade() {
     setState(() {
       countMap = {1: 0, 2: 0, 3: 0};
@@ -67,14 +107,12 @@ class _ChecklistWriteState extends State<ChecklistWrite> {
     final screenWidth = MediaQuery.of(context).size.width;
     final columnCount =
         (screenWidth / 150).floor(); // Adjust the item width (150) as needed
-    final questionData = Hive.box<Question>('question');
-    final checklistData = Hive.box<CheckList>('checklist');
-    final houseData = Hive.box<House>('house');
-
+    // hive 에서 데이터 가져오기
     final firstQuestion =
         questionData.values.where((element) => element.type == 0).toList();
     final secondQuestion =
         questionData.values.where((element) => element.type == 1).toList();
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('임장 체크리스트 작성'),
@@ -93,16 +131,11 @@ class _ChecklistWriteState extends State<ChecklistWrite> {
               const SizedBox(
                 width: 20,
               ),
-              Expanded(
-                child: TextField(
-                  style: const TextStyle(
-                      fontSize: 30.0, fontWeight: FontWeight.w600),
-                  controller: houseNameFieldController,
-                  textDirection: TextDirection.ltr,
-                  decoration: const InputDecoration(
-                    hintText: '아파트 이름 입력',
-                    border: InputBorder.none,
-                  ),
+              Text(
+                widget.houseName, // 앞에서 넘어온 값을 가지고 저장
+                style: const TextStyle(
+                  fontWeight: FontWeight.w600,
+                  fontSize: 32,
                 ),
               ),
             ],
@@ -287,7 +320,7 @@ class _ChecklistWriteState extends State<ChecklistWrite> {
                   initiallyExpanded: !expanded,
                   children: List.generate(
                     firstQuestion.length,
-                    (index) => NewCustomListTile(
+                    (index) => LoadCustomListTile(
                       index: firstQuestion[index].id + 1,
                       question: firstQuestion[index].name,
                       returnData: firstchecklist,
@@ -302,7 +335,7 @@ class _ChecklistWriteState extends State<ChecklistWrite> {
                   title: const Text('1. 임장가서 체크리스트'),
                   children: List.generate(
                     secondQuestion.length,
-                    (index) => NewCustomListTile(
+                    (index) => LoadCustomListTile(
                       index: secondQuestion[index].id + 1,
                       question: secondQuestion[index].name,
                       returnData: secondchecklist,
@@ -314,7 +347,6 @@ class _ChecklistWriteState extends State<ChecklistWrite> {
                     ),
                   ),
                 ),
-
                 // 찍은 사진들을 보여주는 widget
                 // GridView.builder(
                 //   itemCount: 6,
@@ -341,9 +373,9 @@ class _ChecklistWriteState extends State<ChecklistWrite> {
                 ElevatedButton(
                   onPressed: () {
                     houseData.put(
-                        houseNameFieldController.text,
+                        widget.houseName,
                         House(
-                            name: houseNameFieldController.text,
+                            name: widget.houseName,
                             address: '서울시 강남구',
                             price: priceFieldController.text,
                             size: sizeFieldController.text,
@@ -353,7 +385,7 @@ class _ChecklistWriteState extends State<ChecklistWrite> {
                     var firstChkList = <CheckList>[];
                     for (var key in firstchecklist.keys) {
                       firstChkList.add(CheckList(
-                          address: houseNameFieldController.text,
+                          address: widget.houseName,
                           type: 0,
                           questionId: int.parse(key),
                           answer: firstchecklist[key][0],
@@ -362,7 +394,7 @@ class _ChecklistWriteState extends State<ChecklistWrite> {
                     var secondChkList = <CheckList>[];
                     for (var key in secondchecklist.keys) {
                       secondChkList.add(CheckList(
-                          address: houseNameFieldController.text,
+                          address: widget.houseName,
                           type: 1,
                           questionId: int.parse(key),
                           answer: secondchecklist[key][0],

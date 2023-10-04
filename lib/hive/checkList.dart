@@ -12,17 +12,21 @@ class CheckList {
   String address;
 
   @HiveField(1)
-  int questionId;
+  int type;
 
   @HiveField(2)
-  String? answer;
+  int questionId;
 
   @HiveField(3)
+  String answer;
+
+  @HiveField(4)
   String? description;
 
   CheckList(
       {required this.address,
+      required this.type,
       required this.questionId,
-      this.answer,
+      required this.answer,
       this.description});
 }
