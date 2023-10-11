@@ -80,7 +80,96 @@ class _ChecklistWriteState extends State<ChecklistWrite> {
         title: const Text('임장 체크리스트 작성'),
         actions: [
           IconButton(
-            onPressed: () {},
+            onPressed: () {
+              houseData.put(
+                  houseNameFieldController.text,
+                  House(
+                      name: houseNameFieldController.text,
+                      address: '서울시 강남구',
+                      price: priceFieldController.text,
+                      size: sizeFieldController.text,
+                      structure: structureFieldController.text,
+                      description: '매매가능'));
+              // question과 house는 houseName이 key임
+              var firstChkList = <CheckList>[];
+              for (var key in firstchecklist.keys) {
+                firstChkList.add(CheckList(
+                    address: houseNameFieldController.text,
+                    type: 0,
+                    questionId: int.parse(key),
+                    answer: firstchecklist[key][0],
+                    description: firstchecklist[key][1]));
+              }
+              var secondChkList = <CheckList>[];
+              for (var key in secondchecklist.keys) {
+                secondChkList.add(CheckList(
+                    address: houseNameFieldController.text,
+                    type: 1,
+                    questionId: int.parse(key),
+                    answer: secondchecklist[key][0],
+                    description: secondchecklist[key][1]));
+              }
+
+              // 데이터 확인을 위한 print
+              print('save');
+              print('firstchecklist : $firstchecklist');
+              print('secondchecklist : $secondchecklist');
+              print('hive data!!!');
+              final chkList = checklistData.values.toList();
+              // CheckList 객체 출력
+              for (var checklist in chkList) {
+                print('Address: ${checklist.address}');
+                print('Type: ${checklist.type}');
+                print('Question ID: ${checklist.questionId}');
+                print('Answer: ${checklist.answer}');
+                print('Description: ${checklist.description}');
+                print('---');
+              }
+
+              showDialog(
+                context: context,
+                builder: (BuildContext context) {
+                  return AlertDialog(
+                    content: const Text('저장하시겠습니까?'),
+                    actions: <Widget>[
+                      TextButton(
+                        child: const Text('Yes'),
+                        onPressed: () {
+                          // hive에 데이터 저장
+                          for (var saveTobox in firstChkList) {
+                            checklistData.add(saveTobox);
+                          }
+                          for (var saveTobox in secondChkList) {
+                            checklistData.add(saveTobox);
+                          }
+
+                          final chkList = checklistData.values.toList();
+                          print('save btn click');
+                          // CheckList 객체 출력
+                          for (var checklist in chkList) {
+                            print('Address: ${checklist.address}');
+                            print('Type: ${checklist.type}');
+                            print('Question ID: ${checklist.questionId}');
+                            print('Answer: ${checklist.answer}');
+                            print('Description: ${checklist.description}');
+                            print('---');
+                          }
+                          Navigator.of(context).pop(); // Close the dialog
+                          Navigator.of(context)
+                              .pop(); // Go back to the previous screen
+                        },
+                      ),
+                      TextButton(
+                        child: const Text('취소'),
+                        onPressed: () {
+                          Navigator.of(context).pop(); // Close the dialog
+                        },
+                      ),
+                    ],
+                  );
+                },
+              );
+            },
             icon: const Icon(Icons.save),
           ),
         ],
