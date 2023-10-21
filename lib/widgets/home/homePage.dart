@@ -555,7 +555,7 @@ class _HomePageState extends State<HomePage> {
                             index < customizeWidget.length;
                             index++)
                           GestureDetector(
-                            onLongPress: () {
+                            onDoubleTap: () {
                               showDialog(
                                 context: context,
                                 builder: (BuildContext) {
@@ -622,7 +622,7 @@ class _HomePageState extends State<HomePage> {
                               );
                             },
                             child: Tooltip(
-                              message: "폴더를 삭제하실려면 길게 누르세요.",
+                              message: "폴더를 삭제하실려면 두번 클릭하세요.",
                               child: customizeWidget[index],
                             ),
                           ),
