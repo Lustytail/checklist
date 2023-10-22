@@ -1,33 +1,49 @@
 import 'package:flutter/material.dart';
+import 'package:hive_flutter/hive_flutter.dart';
+import 'package:provider/provider.dart';
+import 'package:wyeta/widgets/checklist/checklistWrite.dart';
+import 'package:wyeta/widgets/home/customizeWidget.dart';
+import 'package:wyeta/hive/home.dart';
+import 'package:wyeta/hive/homeList.dart';
+import 'package:wyeta/widgets/home/homState.dart';
 
+import 'package:wyeta/widgets/home/homeBody.dart';
+
+//
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
 
   @override
-  State<HomePage> createState() => _HomePage3State();
+  State<HomePage> createState() => _HomePageState();
 }
 
-class _HomePage3State extends State<HomePage> {
+class _HomePageState extends State<HomePage> {
   String text = "";
   List<Widget> folderRows = [];
+  List<CustomizeWidget> customizeWidget = [];
+  bool customizeWidgettoggle = false;
   final TextEditingController _textFieldController = TextEditingController();
-  Future<void> _pickImage() async {
-    try {
-      // If user picks an image, update the state with the new image file
-      setState(() {
-        Navigator.pop(
-          context,
-        );
-      });
-    } catch (e) {
-      // If there is an error, show a snackbar with the error message
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(e.toString()),
-        ),
-      );
-    }
-  }
+
+  var homeListBox = Hive.box<HomeList>('homeList');
+  var homeBox = Hive.box<Home>('home');
+
+  // Future<void> _pickImage() async {
+  //   try {
+  //     // If user picks an image, update the state with the new image file
+  //     setState(() {
+  //       Navigator.pop(
+  //         context,
+  //       );
+  //     });
+  //   } catch (e) {
+  //     // If there is an error, show a snackbar with the error message
+  //     ScaffoldMessenger.of(context).showSnackBar(
+  //       SnackBar(
+  //         content: Text(e.toString()),
+  //       ),
+  //     );
+  //   }
+  // }
 
   late String formattedDate;
   @override
@@ -92,100 +108,195 @@ class _HomePage3State extends State<HomePage> {
     Navigator.pop(context);
   }
 
-  void openEditModal() async {
-    await showModalBottomSheet<void>(
+  void openEditModal() {
+    showModalBottomSheet(
       context: context,
       builder: (BuildContext context) {
-        return SizedBox(
-          height: 250,
-          child: Column(
-            children: [
-              const Center(
-                child: Text(
-                  "편집",
-                  style: TextStyle(color: Colors.black, fontSize: 20),
-                ),
-              ),
-              SizedBox(
-                child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    IconButton(
-                      onPressed: createFolderModal,
-                      icon: const Icon(
-                        size: 36,
-                        Icons.add_box_sharp,
-                      ),
-                    ),
-                    const Padding(
-                      padding: EdgeInsets.only(
-                        left: 10.0,
-                        top: 6.0,
-                      ),
-                      child: Text(
-                        "새로운 폴더 추가하기",
-                        style: TextStyle(
-                          fontSize: 16,
-                          color: Colors.grey,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              Container(
-                decoration: const BoxDecoration(
-                  border: Border(
-                    top: BorderSide(
-                      style: BorderStyle.solid,
-                      color: Colors.grey,
-                    ),
+        return StatefulBuilder(
+            builder: (BuildContext context, StateSetter bottomState) {
+          return SizedBox(
+            height: 250,
+            child: Column(
+              children: [
+                const Center(
+                  child: Text(
+                    "편집",
+                    style: TextStyle(color: Colors.black, fontSize: 20),
                   ),
                 ),
-              ),
-              Expanded(
-                child: SingleChildScrollView(
-                  child: Column(
+                SizedBox(
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
-                      for (int index = 0; index < folderRows.length; index++)
-                        folderRows[index],
+                      IconButton(
+                        onPressed: () async {
+                          print("호출 처음시작");
+                          final result = await createFolderModal();
+                          print(result);
+                          print("호출 끝");
+
+                          bottomState(() {
+                            result;
+                          });
+                        },
+                        icon: const Icon(
+                          size: 36,
+                          Icons.add_box_sharp,
+                        ),
+                      ),
+                      const Padding(
+                        padding: EdgeInsets.only(
+                          left: 10.0,
+                          top: 6.0,
+                        ),
+                        child: Text(
+                          "새로운 폴더 추가하기",
+                          style: TextStyle(
+                            fontSize: 16,
+                            color: Colors.grey,
+                          ),
+                        ),
+                      ),
                     ],
                   ),
                 ),
-              ),
-              const SizedBox(
-                height: 10,
-              ),
-              ElevatedButton(
-                style: ButtonStyle(
-                  shape: MaterialStateProperty.all<RoundedRectangleBorder>(
-                    RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(
-                          5.0), // Adjust the radius for rounded corners
-                      // Border color to black
+                Container(
+                  decoration: const BoxDecoration(
+                    border: Border(
+                      top: BorderSide(
+                        style: BorderStyle.solid,
+                        color: Colors.grey,
+                      ),
                     ),
                   ),
-                  backgroundColor: MaterialStateProperty.all(
-                    Colors.blue[400],
-                  ),
-                  minimumSize: MaterialStateProperty.all(
-                    const Size(double.infinity, 40),
+                ),
+                Expanded(
+                  child: SingleChildScrollView(
+                    child: Column(
+                      children: [
+                        for (int index = 0; index < folderRows.length; index++)
+                          Dismissible(
+                            confirmDismiss: (direction) {
+                              if (direction == DismissDirection.startToEnd) {
+                                return showDialog(
+                                  context: context,
+                                  builder: (ctx) {
+                                    return AlertDialog(
+                                      title: const Text("Are you sure?"),
+                                      content: Text(
+                                        "Now I Am deleteting $index st Folder",
+                                      ),
+                                      actions: <Widget>[
+                                        ElevatedButton(
+                                          style: const ButtonStyle(
+                                            backgroundColor:
+                                                MaterialStatePropertyAll(
+                                                    Colors.grey),
+                                          ),
+                                          onPressed: () {
+                                            return Navigator.of(context)
+                                                .pop(false);
+                                          },
+                                          child: const Text("CANCEL"),
+                                        ),
+                                        ElevatedButton(
+                                          style: const ButtonStyle(
+                                            backgroundColor:
+                                                MaterialStatePropertyAll(
+                                                    Colors.red),
+                                          ),
+                                          onPressed: () {
+                                            return Navigator.of(context)
+                                                .pop(true);
+                                          },
+                                          child: const Text("DELETE"),
+                                        ),
+                                      ],
+                                    );
+                                  },
+                                );
+                              } else if (direction ==
+                                  DismissDirection.endToStart) {
+                                return showDialog(
+                                    context: context,
+                                    builder: (ctx) {
+                                      return AlertDialog(
+                                        title: const Icon(
+                                          size: 30.0,
+                                          color: Colors.red,
+                                          Icons.warning,
+                                        ),
+                                        content: const Text(
+                                            'Please slide from left to right'),
+                                        actions: <Widget>[
+                                          ElevatedButton(
+                                            onPressed: () {
+                                              return Navigator.of(context)
+                                                  .pop(false);
+                                            },
+                                            child: const Text('OK'),
+                                          ),
+                                        ],
+                                      );
+                                    });
+                              }
+                              return Future.value(null); //아무것도 아닐때 null을 반환
+                            },
+                            onDismissed: (_) {
+                              setState(() {
+                                folderRows.removeAt(index);
+                                customizeWidget.removeAt(index);
+                              });
+                            },
+                            background: Container(
+                              color: Colors.red.withOpacity(
+                                0.8,
+                              ),
+                              alignment: Alignment.centerRight,
+                            ),
+                            key: UniqueKey(),
+                            child: Row(
+                              children: [
+                                folderRows[index],
+                              ],
+                            ),
+                          ),
+                      ],
+                    ),
                   ),
                 ),
-                onPressed: confirm,
-                child: const Text("확인"),
-              ),
-            ],
-          ),
-        );
+                const SizedBox(
+                  height: 10,
+                ),
+                ElevatedButton(
+                  style: ButtonStyle(
+                    shape: MaterialStateProperty.all<RoundedRectangleBorder>(
+                      RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(
+                            5.0), // Adjust the radius for rounded corners
+                        // Border color to black
+                      ),
+                    ),
+                    backgroundColor: MaterialStateProperty.all(
+                      Colors.blue[400],
+                    ),
+                    minimumSize: MaterialStateProperty.all(
+                      const Size(double.infinity, 40),
+                    ),
+                  ),
+                  onPressed: confirm,
+                  child: const Text("확인"),
+                ),
+              ],
+            ),
+          );
+        });
       },
     );
-
-    print("Modal is Close");
   }
 
-  void createFolderModal() async {
-    await showModalBottomSheet<void>(
+  Future<List> createFolderModal() async {
+    return await showModalBottomSheet(
       context: context,
       builder: (BuildContext context) {
         return SizedBox(
@@ -255,731 +366,314 @@ class _HomePage3State extends State<HomePage> {
         );
       },
     );
-    _textFieldController.clear();
-    print("Modal is Close");
   }
 
   void newFolder() {
-    setState(() {
-      text = _textFieldController.text;
+    text = _textFieldController.text;
 
-      if (text.isNotEmpty) {
-        // 폴더 이름이 비어있지 않은 경우에만 추가
-        folderRows.add(
-          SizedBox(
-            height: 60,
-            child: Row(
-              children: [
-                IconButton(
-                  onPressed: () {},
-                  icon: const Icon(
-                    size: 36,
-                    Icons.folder,
+    if (text.isNotEmpty) {
+      // 폴더 이름이 비어있지 않은 경우에만 추가
+      folderRows.add(
+        SizedBox(
+          height: 60,
+          child: Row(
+            children: [
+              IconButton(
+                onPressed: () {},
+                icon: const Icon(
+                  size: 36,
+                  Icons.folder,
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.only(left: 10.0, top: 6.0),
+                child: Text(
+                  text,
+                  style: const TextStyle(
+                    fontSize: 16,
+                    color: Colors.black,
                   ),
                 ),
-                Padding(
-                  padding: const EdgeInsets.only(left: 10.0, top: 6.0),
-                  child: Text(
-                    text,
-                    style: const TextStyle(
-                      fontSize: 16,
-                      color: Colors.black,
-                    ),
-                  ),
-                ),
-              ],
-            ),
+              ),
+            ],
           ),
-        );
-      }
-    });
-    Navigator.pop(context);
+        ),
+      );
+      setState(() {
+        addCustomizeWidget(text, const Color.fromARGB(255, 214, 213, 213));
+      });
+    }
+    _textFieldController.clear();
+    Navigator.pop(context, folderRows);
   }
 
-  void clickActionButton() {}
+  void addCustomizeWidget(String text, Color color) {
+    customizeWidget.add(
+      CustomizeWidget(
+        text: text,
+        color: const Color.fromARGB(255, 214, 213, 213),
+      ),
+    );
+  }
+
+  void clickActionButton() {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => const ChecklistWrite(),
+      ),
+    );
+  }
+
+  void deleteHome(Home home) {
+    // 홈 데이터 삭제
+    int index = homeBox.keys.cast<int>().firstWhere(
+          (key) => homeBox.get(key) == home,
+          orElse: () => -1,
+        );
+
+    if (index != -1) {
+      homeBox.delete(index);
+    }
+
+    // 업데이트된 홈 데이터 목록을 가져옴
+    List<Home> updatedHomeList = homeBox.values.toList();
+
+    // homeListBox의 homeList 업데이트
+    homeListBox.put(
+      "1",
+      HomeList(homeList: updatedHomeList),
+    );
+
+    // 상태 업데이트
+    setState(() {});
+  }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        toolbarHeight: 50,
-        backgroundColor: Colors.white,
-        leading: IconButton(
-          onPressed: () {
-            Navigator.pop(context); //뒤로가기
-          },
-          color: Colors.black,
-          icon: const Icon(Icons.arrow_back),
-        ),
-      ),
-      body: InkWell(
-        child: Column(
-          children: [
-            Row(
-              children: [
-                Expanded(
-                  child: Container(
-                    decoration: isList
-                        ? const BoxDecoration(
-                            border: Border(
-                              bottom: BorderSide(
-                                style: BorderStyle.solid,
-                                color: Color.fromARGB(255, 32, 134, 235),
-                                width: 2.0,
-                              ),
-                            ),
-                          )
-                        : null,
-                    child: InkWell(
-                      onTap: showList,
-                      child: const Text(
-                        style: TextStyle(fontSize: 15),
-                        "리스트로 보기",
-                        textAlign: TextAlign.center,
-                      ),
-                    ),
-                  ),
-                ),
-                Expanded(
-                  child: Container(
-                    decoration: !isList
-                        ? const BoxDecoration(
-                            border: Border(
-                              bottom: BorderSide(
-                                style: BorderStyle.solid,
-                                color: Color.fromARGB(255, 32, 134, 235),
-                                width: 2.0,
-                              ),
-                            ),
-                          )
-                        : null,
-                    child: InkWell(
-                      onTap: showMap,
-                      child: const Text(
-                        "지도로 보기",
-                        textAlign: TextAlign.center,
-                        style: TextStyle(
-                          fontSize: 15,
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-              ],
-            ),
-            // const Padding(
-            //   padding: EdgeInsets.symmetric(vertical: 5),
-            // ),
-            Container(
-              height: 50,
-              decoration: BoxDecoration(
-                border: Border(
-                  bottom: BorderSide(
-                    color: Colors.grey.withOpacity(0.5),
-                    width: 2,
-                  ),
-                ),
-              ),
-              child: Padding(
-                padding: const EdgeInsets.only(left: 16.0, right: 16.0),
-                child: Row(
-                  children: [
-                    Container(
-                      decoration: BoxDecoration(
-                        color: const Color.fromARGB(255, 32, 134, 235),
-                        borderRadius: BorderRadius.circular(30),
-                      ),
-                      child: const Padding(
-                        padding: EdgeInsets.all(8.0),
-                        child: Text(
-                          "전체",
-                          style: TextStyle(
-                            fontSize: 15,
-                          ),
-                        ),
-                      ),
-                    ),
-                    const Padding(
-                      padding: EdgeInsets.symmetric(
-                        horizontal: 5,
-                      ),
-                    ),
-                    Container(
-                      decoration: BoxDecoration(
-                        color: const Color.fromARGB(255, 32, 134, 235),
-                        borderRadius: BorderRadius.circular(20),
-                      ),
-                      child: const Padding(
-                        padding: EdgeInsets.all(8.0),
-                        child: Text(
-                          "내 리스트",
-                          style: TextStyle(
-                            fontSize: 15,
-                          ),
-                        ),
-                      ),
-                    ),
-                    Expanded(
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.end,
-                        children: [
-                          IconButton(
-                            onPressed: openEditModal,
-                            icon: const Icon(
-                              Icons.settings,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-            //body 데이터 들어가는부분
-            Expanded(
-              child: SingleChildScrollView(
-                child: Column(
-                  children: [
-                    Padding(
-                      padding: const EdgeInsets.only(
-                          top: 16.0, left: 16.0, right: 16.0),
-                      child: Row(
-                        children: [
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  formattedDate,
-                                  style:
-                                      const TextStyle(color: Colors.deepPurple),
-                                ),
-                                const Padding(
-                                  padding: EdgeInsets.symmetric(vertical: 5),
-                                ),
-                                const Text("[예시]재건축 앞둔 우성아파트"),
-                                const Padding(
-                                  padding: EdgeInsets.symmetric(vertical: 5),
-                                ),
-                                const Text("전세 7억"),
-                                const Padding(
-                                  padding: EdgeInsets.symmetric(vertical: 5),
-                                ),
-                                const Row(
-                                  children: [
-                                    Text(
-                                      '\u{1F60D}',
-                                      style: TextStyle(
-                                        color: Colors.red,
-                                        fontSize: 20,
-                                      ),
-                                    ),
-                                    Text(
-                                      '\u{1F60A}',
-                                      style: TextStyle(
-                                        color: Colors.amber,
-                                        fontSize: 20,
-                                      ),
-                                    ),
-                                    Text(
-                                      '\u{1F614}',
-                                      style: TextStyle(
-                                        color: Color.fromARGB(255, 24, 15, 15),
-                                        fontSize: 20,
-                                      ),
-                                    ),
-                                  ],
-                                )
-                              ],
-                            ),
-                          ),
-                          Expanded(
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.end,
-                              children: [
-                                Container(
-                                  height: 150,
-                                  width: 150,
-                                  color: Colors.amber,
-                                ),
-                              ],
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.only(left: 16.0, right: 16.0),
-                      child: Container(
-                        decoration: BoxDecoration(
-                          border: Border(
-                            left: BorderSide(
-                              color: Colors.grey.withOpacity(0.5),
-                              style: BorderStyle.solid,
-                              width: 2,
-                            ),
-                          ),
-                        ),
-                        child: Padding(
-                          padding: const EdgeInsets.all(8.0),
-                          child: RichText(
-                            overflow: TextOverflow.ellipsis,
-                            maxLines: 3,
-                            strutStyle: const StrutStyle(fontSize: 8.0),
-                            text: const TextSpan(
-                                text:
-                                    '세계문자 가운데 한글,즉 훈민정음은 흔히들 신비로운 문자라 부르곤 합니다. 그것은 세계 문자 가운데 유일하게 한글만이 그것을 만든 사람과 반포일을 알며, 글자를 만든 원리까지 알기 때문입니다. 세계에 이런 문자는 없습니다. 그래서 한글은, 정확히 말해 [훈민정음 해례본](국보 70호)은 진즉에 유네스코 세계기록유산으로 등재되었습니다. ‘한글’이라는 이름은 1910년대 초에 주시경 선생을 비롯한 한글학자들이 쓰기 시작한 것입니다. 여기서 ‘한’이란 크다는 것을 뜻하니, 한글은 ‘큰 글’을 말한다고 하겠습니다.[네이버 지식백과] 한글 - 세상에서 가장 신비한 문자 (위대한 문화유산, 최준식)',
-                                style: TextStyle(
-                                    color: Colors.black,
-                                    height: 1.4,
-                                    fontSize: 16.0,
-                                    fontFamily: 'NanumSquareRegular')),
-                          ),
-                        ),
-                      ),
-                    ),
-                    const Padding(
-                      padding: EdgeInsets.symmetric(
-                        vertical: 10,
-                      ),
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.only(left: 16.0, right: 16.0),
-                      child: ElevatedButton(
-                        style: ButtonStyle(
-                          shape:
-                              MaterialStateProperty.all<RoundedRectangleBorder>(
-                            RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(
-                                  5.0), // Adjust the radius for rounded corners
-                              side: const BorderSide(
-                                  color: Colors.black), // Border color to black
-                            ),
-                          ),
-                          backgroundColor: MaterialStateProperty.all(
-                            Colors.white,
-                          ),
-                          foregroundColor:
-                              MaterialStateProperty.all(Colors.black),
-                          minimumSize: MaterialStateProperty.all(
-                            const Size(double.infinity, 40),
-                          ),
-                        ),
-                        onPressed: deleteList,
-                        child: const Text("예시 삭제하기"),
-                      ),
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.only(
-                          top: 16.0, left: 16.0, right: 16.0),
-                      child: Row(
-                        children: [
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  formattedDate,
-                                  style:
-                                      const TextStyle(color: Colors.deepPurple),
-                                ),
-                                const Padding(
-                                  padding: EdgeInsets.symmetric(vertical: 5),
-                                ),
-                                const Text("[예시]재건축 앞둔 우성아파트"),
-                                const Padding(
-                                  padding: EdgeInsets.symmetric(vertical: 5),
-                                ),
-                                const Text("전세 7억"),
-                                const Padding(
-                                  padding: EdgeInsets.symmetric(vertical: 5),
-                                ),
-                                const Row(
-                                  children: [
-                                    Text(
-                                      '\u{1F60D}',
-                                      style: TextStyle(
-                                        color: Colors.red,
-                                        fontSize: 20,
-                                      ),
-                                    ),
-                                    Text(
-                                      '\u{1F60A}',
-                                      style: TextStyle(
-                                        color: Colors.amber,
-                                        fontSize: 20,
-                                      ),
-                                    ),
-                                    Text(
-                                      '\u{1F614}',
-                                      style: TextStyle(
-                                        color: Color.fromARGB(255, 24, 15, 15),
-                                        fontSize: 20,
-                                      ),
-                                    ),
-                                  ],
-                                )
-                              ],
-                            ),
-                          ),
-                          Expanded(
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.end,
-                              children: [
-                                Container(
-                                  height: 150,
-                                  width: 150,
-                                  color: Colors.amber,
-                                ),
-                              ],
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.only(left: 16.0, right: 16.0),
-                      child: Container(
-                        decoration: BoxDecoration(
-                          border: Border(
-                            left: BorderSide(
-                              color: Colors.grey.withOpacity(0.5),
-                              style: BorderStyle.solid,
-                              width: 2,
-                            ),
-                          ),
-                        ),
-                        child: Padding(
-                          padding: const EdgeInsets.all(8.0),
-                          child: RichText(
-                            overflow: TextOverflow.ellipsis,
-                            maxLines: 3,
-                            strutStyle: const StrutStyle(fontSize: 8.0),
-                            text: const TextSpan(
-                                text:
-                                    '세계문자 가운데 한글,즉 훈민정음은 흔히들 신비로운 문자라 부르곤 합니다. 그것은 세계 문자 가운데 유일하게 한글만이 그것을 만든 사람과 반포일을 알며, 글자를 만든 원리까지 알기 때문입니다. 세계에 이런 문자는 없습니다. 그래서 한글은, 정확히 말해 [훈민정음 해례본](국보 70호)은 진즉에 유네스코 세계기록유산으로 등재되었습니다. ‘한글’이라는 이름은 1910년대 초에 주시경 선생을 비롯한 한글학자들이 쓰기 시작한 것입니다. 여기서 ‘한’이란 크다는 것을 뜻하니, 한글은 ‘큰 글’을 말한다고 하겠습니다.[네이버 지식백과] 한글 - 세상에서 가장 신비한 문자 (위대한 문화유산, 최준식)',
-                                style: TextStyle(
-                                    color: Colors.black,
-                                    height: 1.4,
-                                    fontSize: 16.0,
-                                    fontFamily: 'NanumSquareRegular')),
-                          ),
-                        ),
-                      ),
-                    ),
-                    const Padding(
-                      padding: EdgeInsets.symmetric(
-                        vertical: 10,
-                      ),
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.only(left: 16.0, right: 16.0),
-                      child: ElevatedButton(
-                        style: ButtonStyle(
-                          shape:
-                              MaterialStateProperty.all<RoundedRectangleBorder>(
-                            RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(
-                                  5.0), // Adjust the radius for rounded corners
-                              side: const BorderSide(
-                                  color: Colors.black), // Border color to black
-                            ),
-                          ),
-                          backgroundColor: MaterialStateProperty.all(
-                            Colors.white,
-                          ),
-                          foregroundColor:
-                              MaterialStateProperty.all(Colors.black),
-                          minimumSize: MaterialStateProperty.all(
-                            const Size(double.infinity, 40),
-                          ),
-                        ),
-                        onPressed: deleteList,
-                        child: const Text("예시 삭제하기"),
-                      ),
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.only(
-                          top: 16.0, left: 16.0, right: 16.0),
-                      child: Row(
-                        children: [
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  formattedDate,
-                                  style:
-                                      const TextStyle(color: Colors.deepPurple),
-                                ),
-                                const Padding(
-                                  padding: EdgeInsets.symmetric(vertical: 5),
-                                ),
-                                const Text("[예시]재건축 앞둔 우성아파트"),
-                                const Padding(
-                                  padding: EdgeInsets.symmetric(vertical: 5),
-                                ),
-                                const Text("전세 7억"),
-                                const Padding(
-                                  padding: EdgeInsets.symmetric(vertical: 5),
-                                ),
-                                const Row(
-                                  children: [
-                                    Text(
-                                      '\u{1F60D}',
-                                      style: TextStyle(
-                                        color: Colors.red,
-                                        fontSize: 20,
-                                      ),
-                                    ),
-                                    Text(
-                                      '\u{1F60A}',
-                                      style: TextStyle(
-                                        color: Colors.amber,
-                                        fontSize: 20,
-                                      ),
-                                    ),
-                                    Text(
-                                      '\u{1F614}',
-                                      style: TextStyle(
-                                        color: Color.fromARGB(255, 24, 15, 15),
-                                        fontSize: 20,
-                                      ),
-                                    ),
-                                  ],
-                                )
-                              ],
-                            ),
-                          ),
-                          Expanded(
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.end,
-                              children: [
-                                Container(
-                                  height: 150,
-                                  width: 150,
-                                  color: Colors.amber,
-                                ),
-                              ],
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.only(left: 16.0, right: 16.0),
-                      child: Container(
-                        decoration: BoxDecoration(
-                          border: Border(
-                            left: BorderSide(
-                              color: Colors.grey.withOpacity(0.5),
-                              style: BorderStyle.solid,
-                              width: 2,
-                            ),
-                          ),
-                        ),
-                        child: Padding(
-                          padding: const EdgeInsets.all(8.0),
-                          child: RichText(
-                            overflow: TextOverflow.ellipsis,
-                            maxLines: 3,
-                            strutStyle: const StrutStyle(fontSize: 8.0),
-                            text: const TextSpan(
-                                text:
-                                    '세계문자 가운데 한글,즉 훈민정음은 흔히들 신비로운 문자라 부르곤 합니다. 그것은 세계 문자 가운데 유일하게 한글만이 그것을 만든 사람과 반포일을 알며, 글자를 만든 원리까지 알기 때문입니다. 세계에 이런 문자는 없습니다. 그래서 한글은, 정확히 말해 [훈민정음 해례본](국보 70호)은 진즉에 유네스코 세계기록유산으로 등재되었습니다. ‘한글’이라는 이름은 1910년대 초에 주시경 선생을 비롯한 한글학자들이 쓰기 시작한 것입니다. 여기서 ‘한’이란 크다는 것을 뜻하니, 한글은 ‘큰 글’을 말한다고 하겠습니다.[네이버 지식백과] 한글 - 세상에서 가장 신비한 문자 (위대한 문화유산, 최준식)',
-                                style: TextStyle(
-                                    color: Colors.black,
-                                    height: 1.4,
-                                    fontSize: 16.0,
-                                    fontFamily: 'NanumSquareRegular')),
-                          ),
-                        ),
-                      ),
-                    ),
-                    const Padding(
-                      padding: EdgeInsets.symmetric(
-                        vertical: 10,
-                      ),
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.only(left: 16.0, right: 16.0),
-                      child: ElevatedButton(
-                        style: ButtonStyle(
-                          shape:
-                              MaterialStateProperty.all<RoundedRectangleBorder>(
-                            RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(
-                                  5.0), // Adjust the radius for rounded corners
-                              side: const BorderSide(
-                                  color: Colors.black), // Border color to black
-                            ),
-                          ),
-                          backgroundColor: MaterialStateProperty.all(
-                            Colors.white,
-                          ),
-                          foregroundColor:
-                              MaterialStateProperty.all(Colors.black),
-                          minimumSize: MaterialStateProperty.all(
-                            const Size(double.infinity, 40),
-                          ),
-                        ),
-                        onPressed: deleteList,
-                        child: const Text("예시 삭제하기"),
-                      ),
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.only(
-                          top: 16.0, left: 16.0, right: 16.0),
-                      child: Row(
-                        children: [
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  formattedDate,
-                                  style:
-                                      const TextStyle(color: Colors.deepPurple),
-                                ),
-                                const Padding(
-                                  padding: EdgeInsets.symmetric(vertical: 5),
-                                ),
-                                const Text("[예시]재건축 앞둔 우성아파트"),
-                                const Padding(
-                                  padding: EdgeInsets.symmetric(vertical: 5),
-                                ),
-                                const Text("전세 7억"),
-                                const Padding(
-                                  padding: EdgeInsets.symmetric(vertical: 5),
-                                ),
-                                const Row(
-                                  children: [
-                                    Text(
-                                      '\u{1F60D}',
-                                      style: TextStyle(
-                                        color: Colors.red,
-                                        fontSize: 20,
-                                      ),
-                                    ),
-                                    Text(
-                                      '\u{1F60A}',
-                                      style: TextStyle(
-                                        color: Colors.amber,
-                                        fontSize: 20,
-                                      ),
-                                    ),
-                                    Text(
-                                      '\u{1F614}',
-                                      style: TextStyle(
-                                        color: Color.fromARGB(255, 24, 15, 15),
-                                        fontSize: 20,
-                                      ),
-                                    ),
-                                  ],
-                                )
-                              ],
-                            ),
-                          ),
-                          Expanded(
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.end,
-                              children: [
-                                Container(
-                                  height: 150,
-                                  width: 150,
-                                  color: Colors.amber,
-                                ),
-                              ],
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.only(left: 16.0, right: 16.0),
-                      child: Container(
-                        decoration: BoxDecoration(
-                          border: Border(
-                            left: BorderSide(
-                              color: Colors.grey.withOpacity(0.5),
-                              style: BorderStyle.solid,
-                              width: 2,
-                            ),
-                          ),
-                        ),
-                        child: Padding(
-                          padding: const EdgeInsets.all(8.0),
-                          child: RichText(
-                            overflow: TextOverflow.ellipsis,
-                            maxLines: 3,
-                            strutStyle: const StrutStyle(fontSize: 8.0),
-                            text: const TextSpan(
-                                text:
-                                    '세계문자 가운데 한글,즉 훈민정음은 흔히들 신비로운 문자라 부르곤 합니다. 그것은 세계 문자 가운데 유일하게 한글만이 그것을 만든 사람과 반포일을 알며, 글자를 만든 원리까지 알기 때문입니다. 세계에 이런 문자는 없습니다. 그래서 한글은, 정확히 말해 [훈민정음 해례본](국보 70호)은 진즉에 유네스코 세계기록유산으로 등재되었습니다. ‘한글’이라는 이름은 1910년대 초에 주시경 선생을 비롯한 한글학자들이 쓰기 시작한 것입니다. 여기서 ‘한’이란 크다는 것을 뜻하니, 한글은 ‘큰 글’을 말한다고 하겠습니다.[네이버 지식백과] 한글 - 세상에서 가장 신비한 문자 (위대한 문화유산, 최준식)',
-                                style: TextStyle(
-                                    color: Colors.black,
-                                    height: 1.4,
-                                    fontSize: 16.0,
-                                    fontFamily: 'NanumSquareRegular')),
-                          ),
-                        ),
-                      ),
-                    ),
-                    const Padding(
-                      padding: EdgeInsets.symmetric(
-                        vertical: 10,
-                      ),
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.only(left: 16.0, right: 16.0),
-                      child: ElevatedButton(
-                        style: ButtonStyle(
-                          shape:
-                              MaterialStateProperty.all<RoundedRectangleBorder>(
-                            RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(
-                                  5.0), // Adjust the radius for rounded corners
-                              side: const BorderSide(
-                                  color: Colors.black), // Border color to black
-                            ),
-                          ),
-                          backgroundColor: MaterialStateProperty.all(
-                            Colors.white,
-                          ),
-                          foregroundColor:
-                              MaterialStateProperty.all(Colors.black),
-                          minimumSize: MaterialStateProperty.all(
-                            const Size(double.infinity, 40),
-                          ),
-                        ),
-                        onPressed: deleteList,
-                        child: const Text("예시 삭제하기"),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
+    final homeState = Provider.of<HomeState>(context);
+    print('homeState $homeState');
 
-            SizedBox(
-              width: 400,
-              child: ElevatedButton(
-                onPressed: clickActionButton,
-                style: ElevatedButton.styleFrom(
-                  padding: const EdgeInsets.all(16.0),
-                  backgroundColor:
-                      Colors.teal.withOpacity(0.5), // Adjust padding as needed
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(
-                        8.0), // Adjust the radius for rounded corners
-                  ), // Button color
+    HomeList? homeListData = homeListBox.get("1");
+    var homeData = homeBox.get(1);
+    // var homeBox = Hive.box<Home>('home');
+    // var temp = homeBox.get("1");
+    // var homeListBox = Hive.box<HomeList>('homeList');
+    // var homeBox = Hive.box<Home>('home');
+    // HomeList? homeListData = homeListBox.get("1");
+    // var homeData = homeBox.get(1);
+    // print(homeData!.name);
+
+    // if (homeListData != null) {
+    //   List<Home> list = homeListData.homeList;
+    //   for (Home home in list) {
+    //     print("Name: ${home.name}");
+    //     print("Address: ${home.address}");
+    //     print("Description: ${home.description}");
+    //     print("Price: ${home.price}");
+
+    //     print("-----");
+    //   }
+    // } else {
+    //   print("No data found in homeListBox for key '1'");
+    // }
+
+    return InkWell(
+      child: Column(
+        children: [
+          Row(
+            children: [
+              Expanded(
+                child: Container(
+                  decoration: isList
+                      ? const BoxDecoration(
+                          border: Border(
+                            bottom: BorderSide(
+                              style: BorderStyle.solid,
+                              color: Color.fromARGB(255, 32, 134, 235),
+                              width: 2.0,
+                            ),
+                          ),
+                        )
+                      : null,
+                  child: InkWell(
+                    onTap: showList,
+                    child: const Text(
+                      style: TextStyle(fontSize: 15),
+                      "리스트로 보기",
+                      textAlign: TextAlign.center,
+                    ),
+                  ),
                 ),
-                child: const Text("새로운 매물 체크 시작하기"),
               ),
-            )
-          ],
-        ),
+              Expanded(
+                child: Container(
+                  decoration: !isList
+                      ? const BoxDecoration(
+                          border: Border(
+                            bottom: BorderSide(
+                              style: BorderStyle.solid,
+                              color: Color.fromARGB(255, 32, 134, 235),
+                              width: 2.0,
+                            ),
+                          ),
+                        )
+                      : null,
+                  child: InkWell(
+                    onTap: showMap,
+                    child: const Text(
+                      "지도로 보기",
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        fontSize: 15,
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+          Container(
+            height: 50,
+            decoration: BoxDecoration(
+              border: Border(
+                bottom: BorderSide(
+                  color: Colors.grey.withOpacity(0.5),
+                  width: 2,
+                ),
+              ),
+            ),
+            child: Padding(
+              padding: const EdgeInsets.only(left: 16.0, right: 16.0),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: ListView(
+                      scrollDirection: Axis.horizontal,
+                      children: [
+                        for (int index = 0;
+                            index < customizeWidget.length;
+                            index++)
+                          GestureDetector(
+                            onDoubleTap: () {
+                              showDialog(
+                                context: context,
+                                builder: (BuildContext) {
+                                  return AlertDialog(
+                                    title: const Text("Are you sure?"),
+                                    content: Text(
+                                      "Now I Am deleteting $index st Folder",
+                                    ),
+                                    actions: <Widget>[
+                                      ElevatedButton(
+                                        style: const ButtonStyle(
+                                          backgroundColor:
+                                              MaterialStatePropertyAll(
+                                                  Colors.grey),
+                                        ),
+                                        onPressed: () {
+                                          return Navigator.of(context)
+                                              .pop(false);
+                                        },
+                                        child: const Text("CANCEL"),
+                                      ),
+                                      ElevatedButton(
+                                        style: const ButtonStyle(
+                                          backgroundColor:
+                                              MaterialStatePropertyAll(
+                                                  Colors.red),
+                                        ),
+                                        onPressed: () {
+                                          setState(
+                                            () {
+                                              customizeWidget.removeAt(index);
+                                              folderRows.removeAt(index);
+                                            },
+                                          );
+                                          return Navigator.of(context)
+                                              .pop(true);
+                                        },
+                                        child: const Text("DELETE"),
+                                      ),
+                                    ],
+                                  );
+                                },
+                              );
+                            },
+                            onTap: () {
+                              setState(
+                                () {
+                                  customizeWidgettoggle
+                                      ? customizeWidget[index] =
+                                          CustomizeWidget(
+                                          text: customizeWidget[index].text,
+                                          color: const Color.fromARGB(
+                                              255, 7, 118, 192),
+                                        )
+                                      : customizeWidget[index] =
+                                          CustomizeWidget(
+                                          text: customizeWidget[index].text,
+                                          color: const Color.fromARGB(
+                                              255, 214, 213, 213),
+                                        );
+                                  customizeWidgettoggle =
+                                      !customizeWidgettoggle;
+                                },
+                              );
+                            },
+                            child: Tooltip(
+                              message: "폴더를 삭제하실려면 두번 클릭하세요.",
+                              child: customizeWidget[index],
+                            ),
+                          ),
+                      ],
+                    ),
+                  ),
+                  Row(
+                    children: [
+                      IconButton(
+                        onPressed: openEditModal,
+                        icon: const Icon(
+                          Icons.settings,
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          ),
+          Expanded(
+            child: SingleChildScrollView(
+              child: Column(
+                children: [
+                  for (Home home in homeListData!.homeList)
+                    HomeBody(
+                      home: home,
+                      onDelete: deleteHome,
+                    ),
+                  //body 데이터(자식)
+                ],
+              ),
+            ),
+          ),
+          SizedBox(
+            width: 400,
+            child: ElevatedButton(
+              onPressed: clickActionButton,
+              style: ElevatedButton.styleFrom(
+                padding: const EdgeInsets.all(16.0),
+                backgroundColor:
+                    Colors.teal.withOpacity(0.5), // Adjust padding as needed
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(
+                      8.0), // Adjust the radius for rounded corners
+                ), // Button color
+              ),
+              child: const Text("새로운 매물 체크 시작하기"),
+            ),
+          )
+        ],
       ),
     );
   }
